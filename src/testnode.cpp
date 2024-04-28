@@ -40,6 +40,17 @@
 
 namespace ddynamic_reconfigure2
 {
+template <class T> static std::ostream&
+operator <<(std::ostream& out, const std::vector<T>& v)
+{
+    for (const auto& val : v)
+	out << ' ' << val;
+    return out;
+}
+    
+/************************************************************************
+*  class TestNode							*
+************************************************************************/
 class TestNode : public rclcpp::Node
 {
   public:
@@ -47,24 +58,69 @@ class TestNode : public rclcpp::Node
 	     const rclcpp::NodeOptions& options=rclcpp::NodeOptions())	;
 
   private:
-    DDynamicReconfigure	_ddr;
-    int64_t		_param_i64;
-    double		_param_d;
+    void	timer_cb()						;
+
+  private:
+    rclcpp::TimerBase::SharedPtr	_timer;
+    DDynamicReconfigure			_ddr;
+    bool				_param_b;
+    int64_t				_param_i64;
+    double				_param_d;
+    std::string				_param_s;
+    std::vector<bool>			_params_b;
+    std::vector<int64_t>		_params_i64;
+    std::vector<double>			_params_d;
+    std::vector<std::string>		_params_s;
 };
 
 TestNode::TestNode(const std::string& node_name,
 		   const rclcpp::NodeOptions& options)
     :rclcpp::Node(node_name, options),
+     _timer(nullptr),
      _ddr(rclcpp::Node::SharedPtr(this)),
-     _param_i64(3), _param_d(0.5)
+     _param_b(true), _param_i64(4), _param_d(0.5), _param_s("str0"),
+     _params_b({false, true}), _params_i64({2, 11}), _params_d({0.1, 0.4}),
+     _params_s({"s0", "s1"})
 {
+    using	namespace std::chrono_literals;
+
+    _ddr.registerVariable("param_b", &_param_b,
+			  "parameter of int64_t type");
     _ddr.registerVariable("param_i64", &_param_i64,
-			  "parameter of int64_t type", {-4, 10, 2});
+			  "parameter of int64_t type", {-4, 10});
     _ddr.registerVariable("param_d", &_param_d,
-			  "parameter of double type", {-1.0, 2.0, 0.1});
+			  "parameter of double type", {-1.0, 2.0});
+    _ddr.registerVariable("param_s", &_param_s,
+			  "parameter of string type");
+    _ddr.registerVariable("params_b", &_params_b,
+			  "parameter array of bool type");
+    _ddr.registerVariable("params_i64", &_params_i64,
+			  "parameter array of int64_t type");
+    _ddr.registerVariable("params_d", &_params_d,
+			  "parameter array of double type");
+    _ddr.registerVariable("params_s", &_params_s,
+			  "parameter array of string type");
+
+    _timer = create_wall_timer(1000ms, std::bind(&TestNode::timer_cb, this));
+}
+
+void
+TestNode::timer_cb()
+{
+    RCLCPP_INFO_STREAM(get_logger(), "param_b[" << _param_b
+		       << "] param_i64[" << _param_i64
+		       << "] param_d[" << _param_d
+		       << "] param_s[" << _param_s
+		       << "] params_b[" << _params_b
+		       << "] params_i64[" << _params_i64
+		       << "] params_d[" << _params_d
+		       << "] params_s[" << _params_s << ']');
 }
 }	// ddynamic_reconfigure2
 
+/************************************************************************
+*  global functions							*
+************************************************************************/
 int
 main(int argc, char* argv[])
 {

@@ -43,177 +43,114 @@
 namespace ddynamic_reconfigure2
 {
 /************************************************************************
-*  class param_range<T>							*
+*  class param_range<T, N>						*
 ************************************************************************/
+namespace detail
+{
+  template <class T> T	check_element(std::vector<T>)			;
+  template <class T> T	check_element(T)				;
+
+  template <class T>
+  using element_t = decltype(check_element(std::declval<T>()));
+  template <class T>
+  using is_vec = std::negation<std::is_same<T, element_t<T> > >;
+}
+    
+template <class T, bool=detail::is_vec<T>::value ||
+			!std::is_arithmetic<T>::value ||
+			std::is_same<bool, detail::element_t<T> >::value>
+class param_range;
+
 template <class T>
-struct param_range;
-
-template <>
-struct param_range<bool>
+class param_range<T, false>
 {
-    rcl_interfaces::msg::ParameterDescriptor
-    param_desc() const
+  public:
+    using element_t = T;
+
+  private:
+    using range_t   = std::conditional_t<
+			  std::is_same<element_t, int64_t>::value,
+			  rcl_interfaces::msg::IntegerRange,
+			  rcl_interfaces::msg::FloatingPointRange>;
+
+    constexpr static uint8_t
+	_type = (std::is_same<element_t, int64_t>::value ?
+		 rcl_interfaces::msg::ParameterType::PARAMETER_INTEGER :
+		 rcl_interfaces::msg::ParameterType::PARAMETER_DOUBLE);
+    
+  public:
+    param_range(element_t from_value=std::numeric_limits<element_t>::min(),
+		element_t to_value  =std::numeric_limits<element_t>::max(),
+		element_t step=0)
+	:_from_value(from_value), _to_value(to_value), _step(step)
     {
-	rcl_interfaces::msg::ParameterDescriptor	desc;
-	desc.type = rcl_interfaces::msg::ParameterType::PARAMETER_BOOL;
-
-	return desc;
-    }
-};
-
-template <>
-struct param_range<int64_t>
-{
-    param_range(int64_t from_value_=std::numeric_limits<int64_t>::min(),
-		int64_t to_value_  =std::numeric_limits<int64_t>::max(),
-		uint64_t step_=1)
-	:from_value(from_value_), to_value(to_value_), step(step_)
-    {
-    }
-
-    rcl_interfaces::msg::IntegerRange
-    integer_range() const
-    {
-	rcl_interfaces::msg::IntegerRange	rng;
-	rng.from_value = from_value;
-	rng.to_value   = to_value;
-	rng.step       = step;
-
-	return rng;
     }
 
     rcl_interfaces::msg::ParameterDescriptor
     param_desc() const
     {
-	rcl_interfaces::msg::ParameterDescriptor	desc;
-	desc.type = rcl_interfaces::msg::ParameterType::PARAMETER_INTEGER;
-	desc.integer_range.push_back(integer_range());
+	range_t	range;
+	range.from_value = _from_value;
+	range.to_value   = _to_value;
+	range.step       = _step;
 
-	return desc;
+	return set_range(range);
     }
 
-    int64_t	from_value;
-    int64_t	to_value;
-    uint64_t	step;
-};
-
-template <>
-struct param_range<double>
-{
-    param_range(double from_value_=std::numeric_limits<double>::min(),
-		double to_value_  =std::numeric_limits<double>::max(),
-		double step_=0)
-	:from_value(from_value_), to_value(to_value_), step(step_)
-    {
-    }
-
-    rcl_interfaces::msg::FloatingPointRange
-    floating_point_range() const
-    {
-	rcl_interfaces::msg::FloatingPointRange	rng;
-	rng.from_value = from_value;
-	rng.to_value   = to_value;
-	rng.step       = step;
-
-	return rng;
-    }
-
+  private:
     rcl_interfaces::msg::ParameterDescriptor
-    param_desc() const
+    set_range(const rcl_interfaces::msg::IntegerRange& range) const
     {
 	rcl_interfaces::msg::ParameterDescriptor	desc;
-	desc.type = rcl_interfaces::msg::ParameterType::PARAMETER_DOUBLE;
-	desc.floating_point_range.push_back(floating_point_range());
+	desc.type = _type;
+	desc.integer_range.push_back(range);
 
 	return desc;
     }
 
-    double	from_value;
-    double	to_value;
-    double	step;
-};
-
-template <>
-struct param_range<std::string>
-{
     rcl_interfaces::msg::ParameterDescriptor
-    param_desc() const
+    set_range(const rcl_interfaces::msg::FloatingPointRange& range) const
     {
 	rcl_interfaces::msg::ParameterDescriptor	desc;
-	desc.type = rcl_interfaces::msg::ParameterType::PARAMETER_STRING;
-
-	return desc;
-    }
-};
-
-template <>
-struct param_range<std::vector<bool> >
-{
-    rcl_interfaces::msg::ParameterDescriptor
-    param_desc() const
-    {
-	rcl_interfaces::msg::ParameterDescriptor	desc;
-	desc.type = rcl_interfaces::msg::ParameterType::PARAMETER_BOOL_ARRAY;
-
-	return desc;
-    }
-};
-
-template <>
-struct param_range<std::vector<int64_t> >
-{
-    param_range(const std::vector<param_range<int64_t> >& ranges)
-	:_ranges(ranges)
-    {
-    }
-
-    rcl_interfaces::msg::ParameterDescriptor
-    param_desc() const
-    {
-	rcl_interfaces::msg::ParameterDescriptor	desc;
-	desc.type = rcl_interfaces::msg::ParameterType::PARAMETER_INTEGER_ARRAY;
-	for (const auto& range : _ranges)
-	    desc.integer_range.push_back(range.integer_range());
+	desc.type = _type;
+	desc.floating_point_range.push_back(range);
 
 	return desc;
     }
 
   private:
-    const std::vector<param_range<int64_t> >	_ranges;
+    element_t	_from_value;
+    element_t	_to_value;
+    element_t	_step;
 };
 
-template <>
-struct param_range<std::vector<double> >
+template <class T>
+class param_range<T, true>
 {
-    param_range(const std::vector<param_range<double> >& ranges)
-	:_ranges(ranges)
-    {
-    }
-
-    rcl_interfaces::msg::ParameterDescriptor
-    param_desc() const
-    {
-	rcl_interfaces::msg::ParameterDescriptor	desc;
-	desc.type = rcl_interfaces::msg::ParameterType::PARAMETER_DOUBLE_ARRAY;
-	for (const auto& range : _ranges)
-	    desc.floating_point_range.push_back(range.floating_point_range());
-
-	return desc;
-    }
+  public:
+    using element_t = detail::element_t<T>;
 
   private:
-    const std::vector<param_range<double> >	_ranges;
-};
+    constexpr static uint8_t
+	_type = (detail::is_vec<T>::value ?
+		 (std::is_same<element_t, bool>::value ?
+		  rcl_interfaces::msg::ParameterType::PARAMETER_BOOL :
+		  rcl_interfaces::msg::ParameterType::PARAMETER_STRING) :
+		 (std::is_same<element_t, bool>::value ?
+		  rcl_interfaces::msg::ParameterType::PARAMETER_BOOL_ARRAY :
+		  std::is_same<element_t, int64_t>::value ?
+		  rcl_interfaces::msg::ParameterType::PARAMETER_INTEGER_ARRAY :
+		  std::is_same<element_t, double>::value ?
+		  rcl_interfaces::msg::ParameterType::PARAMETER_DOUBLE_ARRAY :
+		  rcl_interfaces::msg::ParameterType::PARAMETER_STRING_ARRAY));
 
-template <>
-struct param_range<std::vector<std::string> >
-{
+  public:
     rcl_interfaces::msg::ParameterDescriptor
     param_desc() const
     {
 	rcl_interfaces::msg::ParameterDescriptor	desc;
-	desc.type = rcl_interfaces::msg::ParameterType::PARAMETER_STRING_ARRAY;
-
+	desc.type = _type;
+	
 	return desc;
     }
 };
@@ -224,11 +161,12 @@ struct param_range<std::vector<std::string> >
 class DDynamicReconfigure
 {
   private:
-    using cb_handle_wp	  = std::weak_ptr<rclcpp::ParameterCallbackHandle>;
+    using param_cb_handle_p = std::shared_ptr<rclcpp::ParameterCallbackHandle>;
 
   public:
 		DDynamicReconfigure(rclcpp::Node::SharedPtr node)
-		    :_node(node), _param_handler(_node), _param_cb_handles()
+		    :_node(node),
+		     _param_event_handler(_node), _param_cb_handles()
 		{
 		}
 
@@ -247,8 +185,8 @@ class DDynamicReconfigure
 
   private:
     rclcpp::Node::SharedPtr		_node;
-    rclcpp::ParameterEventHandler	_param_handler;
-    std::list<cb_handle_wp>		_param_cb_handles;
+    rclcpp::ParameterEventHandler	_param_event_handler;
+    std::list<param_cb_handle_p>	_param_cb_handles;
 };
 
 }	// namespace ddynamic_reconfigure2

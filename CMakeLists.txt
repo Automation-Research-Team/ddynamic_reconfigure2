@@ -34,9 +34,16 @@ ament_target_dependencies(
     rclcpp
 )
 
+ament_export_targets(export_${PROJECT_NAME} HAS_LIBRARY_TARGET)
+
 add_executable(
   testnode
     src/testnode.cpp
+)
+
+ament_target_dependencies(
+  testnode
+    rclcpp
 )
 
 target_compile_features(
@@ -49,21 +56,33 @@ target_include_directories(
     $<INSTALL_INTERFACE:include>
 )
 
-ament_target_dependencies(
-  testnode
-    rclcpp
-)
-
 target_link_libraries(
   testnode
-  ${PROJECT_NAME}
+    ${PROJECT_NAME}
 )
 
 install(
-  TARGETS ${PROJECT_NAME} testnode
+  DIRECTORY include/
+  DESTINATION include
+)
+
+install(TARGETS
+  ${PROJECT_NAME}
+  EXPORT export_${PROJECT_NAME}
   ARCHIVE DESTINATION lib
   LIBRARY DESTINATION lib
   RUNTIME DESTINATION bin
+  INCLUDES DESTINATION include
+)
+
+install(TARGETS
+  testnode
+  DESTINATION lib/${PROJECT_NAME}
+)
+
+install(DIRECTORY
+  launch
+  DESTINATION share/${PROJECT_NAME}/
 )
 
 if(BUILD_TESTING)
