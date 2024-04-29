@@ -84,8 +84,6 @@ DDynamicReconfigure::registerVariable(const std::string& name,
 				      const param_range<T>& range,
 				      const std::string& group)
 {
-    using param_t	= rclcpp::Parameter;
-
     auto	desc = range.param_desc();
     desc.name		= name;
     desc.description	= description;
@@ -96,7 +94,8 @@ DDynamicReconfigure::registerVariable(const std::string& name,
 
     _param_cb_handles.emplace_back(
 	_param_event_handler.add_parameter_callback(
-	    name, [cb](const param_t& param){ cb(param.get_value<T>()); }));
+	    name,
+	    [cb](const rclcpp::Parameter& param){cb(param.get_value<T>());}));
 }
 
 // Instantiations

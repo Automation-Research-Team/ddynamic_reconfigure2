@@ -6,5 +6,6 @@ def generate_launch_description():
         Node(name='testnode',
              package='ddynamic_reconfigure2',
              executable='testnode',
-             output='screen')
+             output='screen',
+             parameters=[{'param_i64': -1, 'param_d': 1.7}])
         ])

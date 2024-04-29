@@ -47,18 +47,18 @@ namespace ddynamic_reconfigure2
 ************************************************************************/
 namespace detail
 {
-  template <class T> T	check_element(std::vector<T>)			;
-  template <class T> T	check_element(T)				;
+  template <class T> static T	check_element(std::vector<T>)		;
+  template <class T> static T	check_element(T)			;
 
   template <class T>
   using element_t = decltype(check_element(std::declval<T>()));
   template <class T>
   using is_vec = std::negation<std::is_same<T, element_t<T> > >;
 }
-    
-template <class T, bool=detail::is_vec<T>::value ||
-			!std::is_arithmetic<T>::value ||
-			std::is_same<bool, detail::element_t<T> >::value>
+
+template <class T, bool=std::is_same<bool, T>::value ||
+			detail::is_vec<T>::value ||
+			!std::is_arithmetic<T>::value>
 class param_range;
 
 template <class T>
@@ -73,11 +73,6 @@ class param_range<T, false>
 			  rcl_interfaces::msg::IntegerRange,
 			  rcl_interfaces::msg::FloatingPointRange>;
 
-    constexpr static uint8_t
-	_type = (std::is_same<element_t, int64_t>::value ?
-		 rcl_interfaces::msg::ParameterType::PARAMETER_INTEGER :
-		 rcl_interfaces::msg::ParameterType::PARAMETER_DOUBLE);
-    
   public:
     param_range(element_t from_value=std::numeric_limits<element_t>::min(),
 		element_t to_value  =std::numeric_limits<element_t>::max(),
@@ -102,7 +97,7 @@ class param_range<T, false>
     set_range(const rcl_interfaces::msg::IntegerRange& range) const
     {
 	rcl_interfaces::msg::ParameterDescriptor	desc;
-	desc.type = _type;
+	desc.type = rcl_interfaces::msg::ParameterType::PARAMETER_INTEGER;
 	desc.integer_range.push_back(range);
 
 	return desc;
@@ -112,7 +107,7 @@ class param_range<T, false>
     set_range(const rcl_interfaces::msg::FloatingPointRange& range) const
     {
 	rcl_interfaces::msg::ParameterDescriptor	desc;
-	desc.type = _type;
+	desc.type = rcl_interfaces::msg::ParameterType::PARAMETER_DOUBLE;
 	desc.floating_point_range.push_back(range);
 
 	return desc;
@@ -150,7 +145,7 @@ class param_range<T, true>
     {
 	rcl_interfaces::msg::ParameterDescriptor	desc;
 	desc.type = _type;
-	
+
 	return desc;
     }
 };
