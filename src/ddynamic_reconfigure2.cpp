@@ -98,6 +98,26 @@ DDynamicReconfigure::registerVariable(const std::string& name,
 	    [cb](const rclcpp::Parameter& param){cb(param.get_value<T>());}));
 }
 
+template <class T> void
+DDynamicReconfigure::registerVariable(const std::string& name, T* variable,
+				      const std::string& description,
+				      T min, T max, const std::string& group)
+{
+    registerVariable(name, variable, description,
+		     param_range<T>(min, max, 0), group);
+}
+
+template <class T> void
+DDynamicReconfigure::registerVariable(const std::string& name,
+				      const T& current_value,
+				      const std::function<void(const T&)>& cb,
+				      const std::string& description,
+				      T min, T max, const std::string& group)
+{
+    registerVariable(name, current_value, description,
+		     param_range<T>(min, max, 0), group);
+}
+    
 // Instantiations
 template void
 DDynamicReconfigure::registerVariable(
@@ -108,13 +128,13 @@ DDynamicReconfigure::registerVariable(
 template void
 DDynamicReconfigure::registerVariable(
     const std::string& name, int64_t* variable,
-    const std::string& description, const param_range<int64_t>& range,
+    const std::string& description, int64_t min, int64_t max,
     const std::string& group);
 
 template void
 DDynamicReconfigure::registerVariable(
     const std::string& name, double* variable,
-    const std::string& description, const param_range<double>& range,
+    const std::string& description, double min, double max,
     const std::string& group);
 
 template void

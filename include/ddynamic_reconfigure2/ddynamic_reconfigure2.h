@@ -177,7 +177,19 @@ class DDynamicReconfigure
 				 const std::string& description="",
 				 const param_range<T>& range={},
 				 const std::string& group="Default")	;
-
+    template <class T>
+    void	registerVariable(const std::string& name, T* variable,
+				 const std::string& description,
+				 T min, T max,
+				 const std::string& group="Default")	;
+    template <class T>
+    void	registerVariable(const std::string& name,
+				 const T& current_value,
+				 const std::function<void(const T&)>& cb,
+				 const std::string& description,
+				 T min, T max,
+				 const std::string& group="Default")	;
+    
   private:
     rclcpp::Node::SharedPtr		_node;
     rclcpp::ParameterEventHandler	_param_event_handler;
