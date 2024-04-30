@@ -140,6 +140,10 @@ class param_range<T, false>
 		  rcl_interfaces::msg::ParameterType::PARAMETER_STRING_ARRAY));
 
   public:
+    param_range(element_t=element_t(), element_t=element_t())
+    {
+    }
+
     rcl_interfaces::msg::ParameterDescriptor
     param_desc() const
     {
@@ -284,11 +288,11 @@ DDynamicReconfigure::registerEnumVariable(const std::string& name,
     T	max = min;
     for (const auto& val : enum_dict)
     {
-	min = std::min(min, val.second);
-	max = std::max(max, val.second);
+	min = (min < val.second ? min : val.second);
+	max = (max > val.second ? max : val.second);
     }
 
-    auto	desc = param_range<T>(min, max, 0).param_desc();
+    auto	desc = param_range<T>(min, max).param_desc();
     desc.name		= (group.empty() ? name : group + '.' + name);
     desc.description	= description;
     desc.read_only	= false;

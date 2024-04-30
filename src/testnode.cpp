@@ -72,6 +72,7 @@ class TestNode : public rclcpp::Node
     std::vector<double>			_params_d;
     std::vector<std::string>		_params_s;
     double				_enum_param_d;
+    std::string				_enum_param_s;
 };
 
 TestNode::TestNode(const std::string& node_name,
@@ -81,7 +82,7 @@ TestNode::TestNode(const std::string& node_name,
      _ddr(rclcpp::Node::SharedPtr(this)),
      _param_b(true), _param_i64(4), _param_d(0.5), _param_s("str0"),
      _params_b({false, true}), _params_i64({2, 11}), _params_d({0.1, 0.4}),
-     _params_s({"s0", "s1"}), _enum_param_d(2.1)
+     _params_s({"s0", "s1"}), _enum_param_d(2.1), _enum_param_s("Two")
 {
     using	namespace std::chrono_literals;
 
@@ -103,6 +104,11 @@ TestNode::TestNode(const std::string& node_name,
 			      "enum parameter of double type",
 			      {{"low", 1.0}, {"middle", 2.1}, {"high", 3.2}},
 			      "low/middle/high", "numeric");
+    _ddr.registerEnumVariable("enum_param_s", &_enum_param_s,
+			      "enum parameter of string type",
+			      {{"one", "One"}, {"two", "Two"},
+			       {"three", "Three"}},
+			      "one/two/three");
 
     _timer = create_wall_timer(1000ms, std::bind(&TestNode::timer_cb, this));
 }
@@ -119,6 +125,7 @@ TestNode::timer_cb()
 		       << "] params_d[" << _params_d
 		       << "] params_s[" << _params_s
 		       << "] enum_param_d[" << _enum_param_d
+		       << "] enum_param_s[" << _enum_param_s
 		       << ']');
 }
 }	// ddynamic_reconfigure2
