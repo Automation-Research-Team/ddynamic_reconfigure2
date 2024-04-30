@@ -41,7 +41,7 @@
 namespace ddynamic_reconfigure2
 {
 /************************************************************************
-*  static functions (for debugging)					*
+*  static functions							*
 ************************************************************************/
 static std::ostream&
 operator <<(std::ostream& out,
@@ -49,6 +49,8 @@ operator <<(std::ostream& out,
 {
     out << "name: " << desc.name
 	<< "\ntype: " << int(desc.type)
+	<< "\ndescription: " << desc.description
+	<< "\nadditional_constraints: " << desc.additional_constraints
 	<< "\nread_only: " << desc.read_only
 	<< "\nfloating_point_range:";
     for (const auto& range : desc.floating_point_range)
@@ -58,117 +60,66 @@ operator <<(std::ostream& out,
     for (const auto& range : desc.integer_range)
 	out << " [" << range.from_value << "," << range.to_value
 	    << ':' << range.step << ']';
-    return out;
+    return out << std::endl;
 }
 
 /************************************************************************
 *  class DDynamicReconfigure						*
 ************************************************************************/
 template <class T> void
-DDynamicReconfigure::registerVariable(const std::string& name, T* variable,
-				      const std::string& description,
-				      const param_range<T>& range,
-				      const std::string& group)
+DDynamicReconfigure::registerParameter(const param_desc_t& desc,
+				       const T& current_value,
+				       const std::function<void(const T&)>& cb,
+				       const std::string& group)
 {
-    registerVariable(name, *variable,
-		     std::function<void(const T&)>([variable](const T& value)
-						   { *variable = value; }),
-		     description, range, group);
-}
+    std::cerr << desc << std::endl;
 
-template <class T> void
-DDynamicReconfigure::registerVariable(const std::string& name,
-				      const T& current_value,
-				      const std::function<void(const T&)>& cb,
-				      const std::string& description,
-				      const param_range<T>& range,
-				      const std::string& group)
-{
-    auto	desc = range.param_desc();
-    desc.name		= name;
-    desc.description	= description;
-    desc.read_only	= false;
-    desc.dynamic_typing = false;
-  //std::cerr << desc << std::endl;
-    _node->declare_parameter(name, current_value, desc);
+    _node->declare_parameter(desc.name, current_value, desc);
 
     _param_cb_handles.emplace_back(
 	_param_event_handler.add_parameter_callback(
-	    name,
+	    desc.name,
 	    [cb](const rclcpp::Parameter& param){cb(param.get_value<T>());}));
 }
 
-template <class T> void
-DDynamicReconfigure::registerVariable(const std::string& name, T* variable,
-				      const std::string& description,
-				      T min, T max, const std::string& group)
-{
-    registerVariable(name, variable, description,
-		     param_range<T>(min, max, 0), group);
-}
-
-template <class T> void
-DDynamicReconfigure::registerVariable(const std::string& name,
-				      const T& current_value,
-				      const std::function<void(const T&)>& cb,
-				      const std::string& description,
-				      T min, T max, const std::string& group)
-{
-    registerVariable(name, current_value, description,
-		     param_range<T>(min, max, 0), group);
-}
-    
 // Instantiations
-template void
-DDynamicReconfigure::registerVariable(
-    const std::string& name, bool* variable,
-    const std::string& description, const param_range<bool>& range,
-    const std::string& group);
-
-template void
-DDynamicReconfigure::registerVariable(
-    const std::string& name, int64_t* variable,
-    const std::string& description, int64_t min, int64_t max,
-    const std::string& group);
-
-template void
-DDynamicReconfigure::registerVariable(
-    const std::string& name, double* variable,
-    const std::string& description, double min, double max,
-    const std::string& group);
-
-template void
-DDynamicReconfigure::registerVariable(
-    const std::string& name, std::string* variable,
-    const std::string& description, const param_range<std::string>& range,
-    const std::string& group);
-
-template void
-DDynamicReconfigure::registerVariable(
-    const std::string& name, std::vector<bool>* variable,
-    const std::string& description,
-    const param_range<std::vector<bool> >& range,
-    const std::string& group);
-
-template void
-DDynamicReconfigure::registerVariable(
-    const std::string& name, std::vector<int64_t>* variable,
-    const std::string& description,
-    const param_range<std::vector<int64_t> >& range,
-    const std::string& group);
-
-template void
-DDynamicReconfigure::registerVariable(
-    const std::string& name, std::vector<double>* variable,
-    const std::string& description,
-    const param_range<std::vector<double> >& range,
-    const std::string& group);
-
-template void
-DDynamicReconfigure::registerVariable(
-    const std::string& name, std::vector<std::string>* variable,
-    const std::string& description,
-    const param_range<std::vector<std::string> >& range,
-    const std::string& group);
+template void	DDynamicReconfigure::registerParameter(
+		    const param_desc_t& desc, const bool& current_value,
+		    const std::function<void(const bool&)>& cb,
+		    const std::string& group)				;
+template void	DDynamicReconfigure::registerParameter(
+		    const param_desc_t& desc, const int64_t& current_value,
+		    const std::function<void(const int64_t&)>& cb,
+		    const std::string& group)				;
+template void	DDynamicReconfigure::registerParameter(
+		    const param_desc_t& desc, const double& current_value,
+		    const std::function<void(const double&)>& cb,
+		    const std::string& group)				;
+template void	DDynamicReconfigure::registerParameter(
+		    const param_desc_t& desc,
+		    const std::string& current_value,
+		    const std::function<void(const std::string&)>& cb,
+		    const std::string& group)				;
+template void	DDynamicReconfigure::registerParameter(
+		    const param_desc_t& desc,
+		    const std::vector<bool>& current_value,
+		    const std::function<void(const std::vector<bool>&)>& cb,
+		    const std::string& group)				;
+template void	DDynamicReconfigure::registerParameter(
+		    const param_desc_t& desc,
+		    const std::vector<int64_t>& current_value,
+		    const std::function<void(const std::vector<int64_t>&)>& cb,
+		    const std::string& group)				;
+template void	DDynamicReconfigure::registerParameter(
+		    const param_desc_t& desc,
+		    const std::vector<double>& current_value,
+		    const std::function<void(const std::vector<double>&)>& cb,
+		    const std::string& group)				;
+template void	DDynamicReconfigure::registerParameter(
+		    const param_desc_t& desc,
+		    const std::vector<std::string>& current_value,
+		    const std::function<
+				void(const std::vector<std::string>&)>& cb,
+		    const std::string& group)				;
 
 }	// namespace ddynamic_reconfigure2

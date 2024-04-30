@@ -39,6 +39,7 @@
 #pragma once
 
 #include <rclcpp/rclcpp.hpp>
+#include <nlohmann/json.hpp>
 
 namespace ddynamic_reconfigure2
 {
@@ -53,16 +54,15 @@ namespace detail
   template <class T>
   using element_t = decltype(check_element(std::declval<T>()));
   template <class T>
-  using is_vec = std::negation<std::is_same<T, element_t<T> > >;
+  using is_scalar = std::is_same<T, element_t<T> >;
 }
 
-template <class T, bool=std::is_same<bool, T>::value ||
-			detail::is_vec<T>::value ||
-			!std::is_arithmetic<T>::value>
+template <class T, bool=std::is_same<int64_t, T>::value ||
+		        std::is_same<double,  T>::value>
 class param_range;
 
 template <class T>
-class param_range<T, false>
+class param_range<T, true>
 {
   public:
     using element_t = T;
@@ -120,14 +120,14 @@ class param_range<T, false>
 };
 
 template <class T>
-class param_range<T, true>
+class param_range<T, false>
 {
   public:
     using element_t = detail::element_t<T>;
 
   private:
     constexpr static uint8_t
-	_type = (detail::is_vec<T>::value ?
+	_type = (detail::is_scalar<T>::value ?
 		 (std::is_same<element_t, bool>::value ?
 		  rcl_interfaces::msg::ParameterType::PARAMETER_BOOL :
 		  rcl_interfaces::msg::ParameterType::PARAMETER_STRING) :
@@ -157,6 +157,7 @@ class DDynamicReconfigure
 {
   private:
     using param_cb_handle_p = std::shared_ptr<rclcpp::ParameterCallbackHandle>;
+    using param_desc_t	    = rcl_interfaces::msg::ParameterDescriptor;
 
   public:
 		DDynamicReconfigure(rclcpp::Node::SharedPtr node)
@@ -178,6 +179,24 @@ class DDynamicReconfigure
 				 const param_range<T>& range={},
 				 const std::string& group="Default")	;
     template <class T>
+    void	registerEnumVariable(const std::string& name, T* variable,
+				     const std::string& description="",
+				     const std::map<std::string, T>&
+						enum_dict={},
+				     const std::string& enum_description="",
+				     const std::string& group="Default");
+    template <class T>
+    void	registerEnumVariable(const std::string& name,
+				     const T& current_value,
+				     const std::function<void(const T&)>& cb,
+				     const std::string& description="",
+				     const std::map<std::string, T>&
+						enum_dict={},
+				     const std::string& enum_description="",
+				     const std::string& group="Default");
+
+  // For compatibility of ROS1 ddynamic_reconfigure
+    template <class T>
     void	registerVariable(const std::string& name, T* variable,
 				 const std::string& description,
 				 T min, T max,
@@ -189,11 +208,121 @@ class DDynamicReconfigure
 				 const std::string& description,
 				 T min, T max,
 				 const std::string& group="Default")	;
-    
+    void	publishServicesTopics()					{}
+    void	publishServicesTopicsAndUpdateConfigData()		{}
+
+  private:
+    template <class T>
+    void	registerParameter(const param_desc_t& desc,
+				  const T& current_value,
+				  const std::function<void(const T&)>& cb,
+				  const std::string& group)		;
+
   private:
     rclcpp::Node::SharedPtr		_node;
     rclcpp::ParameterEventHandler	_param_event_handler;
     std::list<param_cb_handle_p>	_param_cb_handles;
 };
+
+template <class T> void
+DDynamicReconfigure::registerVariable(const std::string& name, T* variable,
+				      const std::string& description,
+				      const param_range<T>& range,
+				      const std::string& group)
+{
+    registerVariable(name, *variable,
+		     std::function<void(const T&)>([variable](const T& value)
+						   { *variable = value; }),
+		     description, range, group);
+}
+
+template <class T> void
+DDynamicReconfigure::registerVariable(const std::string& name,
+				      const T& current_value,
+				      const std::function<void(const T&)>& cb,
+				      const std::string& description,
+				      const param_range<T>& range,
+				      const std::string& group)
+{
+    auto	desc = range.param_desc();
+    desc.name		= name;
+    desc.description	= description;
+    desc.read_only	= false;
+    desc.dynamic_typing = false;
+
+    registerParameter(desc, current_value, cb, group);
+}
+
+template <class T> void
+DDynamicReconfigure::registerEnumVariable(const std::string& name, T* variable,
+					  const std::string& description,
+					  const std::map<std::string, T>&
+							enum_dict,
+					  const std::string& enum_description,
+					  const std::string& group)
+{
+    registerEnumVariable(name, *variable,
+			 std::function<void(const T&)>(
+			     [variable](const T& value){ *variable = value; }),
+			 description, enum_dict, enum_description, group);
+}
+
+template <class T> void
+DDynamicReconfigure::registerEnumVariable(const std::string& name,
+					  const T& current_value,
+					  const std::function<void(const T&)>&
+							cb,
+					  const std::string& description,
+					  const std::map<std::string, T>&
+							enum_dict,
+					  const std::string& enum_description,
+					  const std::string& group)
+{
+    if (enum_dict.empty())
+	throw std::runtime_error("Trying to register an empty enum");
+
+    T	min = enum_dict.begin()->second;
+    T	max = min;
+
+    for (const auto& val : enum_dict)
+    {
+	min = std::min(min, val.second);
+	max = std::max(max, val.second);
+    }
+
+    auto	desc = param_range<T>(min, max, 0).param_desc();
+    desc.name		= name;
+    desc.description	= description;
+    desc.read_only	= false;
+    desc.dynamic_typing = false;
+
+    nlohmann::json	json;
+    json["enum_description"] = enum_description;
+    json["enum"] = nlohmann::json(enum_dict);
+
+    desc.additional_constraints = json.dump();
+
+    registerParameter(desc, current_value, cb, group);
+}
+
+template <class T> void
+DDynamicReconfigure::registerVariable(const std::string& name, T* variable,
+				      const std::string& description,
+				      T min, T max, const std::string& group)
+{
+    registerVariable(name, variable, description,
+		     param_range<T>(min, max, 0), group);
+}
+
+template <class T> void
+DDynamicReconfigure::registerVariable(const std::string& name,
+				      const T& current_value,
+				      const std::function<void(const T&)>& cb,
+				      const std::string& description,
+				      T min, T max, const std::string& group)
+{
+    registerVariable(name, current_value, description,
+		     param_range<T>(min, max, 0), group);
+}
 
 }	// namespace ddynamic_reconfigure2
