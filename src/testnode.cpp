@@ -89,10 +89,10 @@ TestNode::TestNode(const std::string& node_name,
 				"parameter of int64_t type");
     _ddr.registerVariable<int64_t>("param_i64", &_param_i64,
 				   "parameter of int64_t type",
-				   -4, 10, "numeric");
+				   {-4, 10, 2}, "numeric");
     _ddr.registerVariable<double>("param_d", &_param_d,
 				  "parameter of double type",
-				  {-1.0, 2.0}, "numeric");
+				  -1.0, 2.0, "numeric");
     _ddr.registerVariable<std::string>("param_s", &_param_s,
 				       "parameter of string type");
     _ddr.registerVariable("params_b", &_params_b,

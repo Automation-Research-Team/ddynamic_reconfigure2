@@ -1,4 +1,4 @@
-from launch import LaunchDescription
+from launch             import LaunchDescription
 from launch_ros.actions import Node
 
 def generate_launch_description():
@@ -7,5 +7,5 @@ def generate_launch_description():
              package='ddynamic_reconfigure2',
              executable='testnode',
              output='screen',
-             parameters=[{'param_i64': -1, 'param_d': 1.7}])
+             parameters=[{'numeric.param_i64': -2, 'numeric.param_d': 1.6}])
         ])

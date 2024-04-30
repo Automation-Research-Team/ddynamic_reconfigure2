@@ -170,21 +170,21 @@ class DDynamicReconfigure
     void	registerVariable(const std::string& name, T* variable,
 				 const std::string& description="",
 				 const param_range<T>& range={},
-				 const std::string& group="Default")	;
+				 const std::string& group="")		;
     template <class T>
     void	registerVariable(const std::string& name,
 				 const T& current_value,
 				 const std::function<void(const T&)>& cb,
 				 const std::string& description="",
 				 const param_range<T>& range={},
-				 const std::string& group="Default")	;
+				 const std::string& group="")		;
     template <class T>
     void	registerEnumVariable(const std::string& name, T* variable,
 				     const std::string& description="",
 				     const std::map<std::string, T>&
 						enum_dict={},
 				     const std::string& enum_description="",
-				     const std::string& group="Default");
+				     const std::string& group="")	;
     template <class T>
     void	registerEnumVariable(const std::string& name,
 				     const T& current_value,
@@ -193,21 +193,21 @@ class DDynamicReconfigure
 				     const std::map<std::string, T>&
 						enum_dict={},
 				     const std::string& enum_description="",
-				     const std::string& group="Default");
+				     const std::string& group="")	;
 
   // For compatibility of ROS1 ddynamic_reconfigure
     template <class T>
     void	registerVariable(const std::string& name, T* variable,
 				 const std::string& description,
 				 T min, T max,
-				 const std::string& group="Default")	;
+				 const std::string& group="")		;
     template <class T>
     void	registerVariable(const std::string& name,
 				 const T& current_value,
 				 const std::function<void(const T&)>& cb,
 				 const std::string& description,
 				 T min, T max,
-				 const std::string& group="Default")	;
+				 const std::string& group="")		;
     void	publishServicesTopics()					{}
     void	publishServicesTopicsAndUpdateConfigData()		{}
 
@@ -215,8 +215,7 @@ class DDynamicReconfigure
     template <class T>
     void	registerParameter(const param_desc_t& desc,
 				  const T& current_value,
-				  const std::function<void(const T&)>& cb,
-				  const std::string& group)		;
+				  const std::function<void(const T&)>& cb);
 
   private:
     rclcpp::Node::SharedPtr		_node;
@@ -245,12 +244,12 @@ DDynamicReconfigure::registerVariable(const std::string& name,
 				      const std::string& group)
 {
     auto	desc = range.param_desc();
-    desc.name		= name;
+    desc.name		= (group.empty() ? name : group + '.' + name);
     desc.description	= description;
     desc.read_only	= false;
     desc.dynamic_typing = false;
 
-    registerParameter(desc, current_value, cb, group);
+    registerParameter(desc, current_value, cb);
 }
 
 template <class T> void
@@ -283,7 +282,6 @@ DDynamicReconfigure::registerEnumVariable(const std::string& name,
 
     T	min = enum_dict.begin()->second;
     T	max = min;
-
     for (const auto& val : enum_dict)
     {
 	min = std::min(min, val.second);
@@ -291,7 +289,7 @@ DDynamicReconfigure::registerEnumVariable(const std::string& name,
     }
 
     auto	desc = param_range<T>(min, max, 0).param_desc();
-    desc.name		= name;
+    desc.name		= (group.empty() ? name : group + '.' + name);
     desc.description	= description;
     desc.read_only	= false;
     desc.dynamic_typing = false;
@@ -299,10 +297,9 @@ DDynamicReconfigure::registerEnumVariable(const std::string& name,
     nlohmann::json	json;
     json["enum_description"] = enum_description;
     json["enum"] = nlohmann::json(enum_dict);
-
     desc.additional_constraints = json.dump();
 
-    registerParameter(desc, current_value, cb, group);
+    registerParameter(desc, current_value, cb);
 }
 
 template <class T> void
