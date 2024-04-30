@@ -85,16 +85,12 @@ TestNode::TestNode(const std::string& node_name,
 {
     using	namespace std::chrono_literals;
 
-    _ddr.registerVariable<bool>("param_b", &_param_b,
-				"parameter of int64_t type");
-    _ddr.registerVariable<int64_t>("param_i64", &_param_i64,
-				   "parameter of int64_t type",
-				   {-4, 10, 2}, "numeric");
-    _ddr.registerVariable<double>("param_d", &_param_d,
-				  "parameter of double type",
-				  -1.0, 2.0, "numeric");
-    _ddr.registerVariable<std::string>("param_s", &_param_s,
-				       "parameter of string type");
+    _ddr.registerVariable("param_b", &_param_b, "parameter of bool type");
+    _ddr.registerVariable("param_i64", &_param_i64,
+			  "parameter of int64_t type", {-4, 10, 2}, "numeric");
+    _ddr.registerVariable("param_d", &_param_d,
+			  "parameter of double type", -1.0, 2.0, "numeric");
+    _ddr.registerVariable("param_s", &_param_s, "parameter of string type");
     _ddr.registerVariable("params_b", &_params_b,
 			  "parameter array of bool type");
     _ddr.registerVariable("params_i64", &_params_i64,
@@ -103,12 +99,10 @@ TestNode::TestNode(const std::string& node_name,
 			  "parameter array of double type");
     _ddr.registerVariable("params_s", &_params_s,
 			  "parameter array of string type");
-    _ddr.registerEnumVariable<double>("enum_param_d", &_enum_param_d,
-				      "enum parameter of double type",
-				      {{"low", 1.0},
-				       {"middle", 2.1},
-				       {"high", 3.2}},
-				      "low/middle/high", "numeric");
+    _ddr.registerEnumVariable("enum_param_d", &_enum_param_d,
+			      "enum parameter of double type",
+			      {{"low", 1.0}, {"middle", 2.1}, {"high", 3.2}},
+			      "low/middle/high", "numeric");
 
     _timer = create_wall_timer(1000ms, std::bind(&TestNode::timer_cb, this));
 }
