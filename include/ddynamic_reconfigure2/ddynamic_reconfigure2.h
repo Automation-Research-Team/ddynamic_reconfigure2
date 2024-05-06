@@ -173,22 +173,19 @@ class DDynamicReconfigure
     template <class T>
     void	registerVariable(const std::string& name, T* variable,
 				 const std::string& description="",
-				 const param_range<T>& range={},
-				 const std::string& group="")		;
+				 const param_range<T>& range={})	;
     template <class T>
     void	registerVariable(const std::string& name,
 				 const T& current_value,
 				 const std::function<void(const T&)>& cb,
 				 const std::string& description="",
-				 const param_range<T>& range={},
-				 const std::string& group="")		;
+				 const param_range<T>& range={})	;
     template <class T>
     void	registerEnumVariable(const std::string& name, T* variable,
 				     const std::string& description="",
 				     const std::map<std::string, T>&
 						enum_dict={},
-				     const std::string& enum_description="",
-				     const std::string& group="")	;
+				     const std::string& enum_description="");
     template <class T>
     void	registerEnumVariable(const std::string& name,
 				     const T& current_value,
@@ -196,10 +193,9 @@ class DDynamicReconfigure
 				     const std::string& description="",
 				     const std::map<std::string, T>&
 						enum_dict={},
-				     const std::string& enum_description="",
-				     const std::string& group="")	;
+				     const std::string& enum_description="");
 
-  // For compatibility of ROS1 ddynamic_reconfigure
+  // For compatibility with ROS1's ddynamic_reconfigure
     template <class T>
     void	registerVariable(const std::string& name, T* variable,
 				 const std::string& description,
@@ -230,13 +226,12 @@ class DDynamicReconfigure
 template <class T> void
 DDynamicReconfigure::registerVariable(const std::string& name, T* variable,
 				      const std::string& description,
-				      const param_range<T>& range,
-				      const std::string& group)
+				      const param_range<T>& range)
 {
     registerVariable(name, *variable,
 		     std::function<void(const T&)>([variable](const T& value)
 						   { *variable = value; }),
-		     description, range, group);
+		     description, range);
 }
 
 template <class T> void
@@ -244,11 +239,10 @@ DDynamicReconfigure::registerVariable(const std::string& name,
 				      const T& current_value,
 				      const std::function<void(const T&)>& cb,
 				      const std::string& description,
-				      const param_range<T>& range,
-				      const std::string& group)
+				      const param_range<T>& range)
 {
     auto	desc = range.param_desc();
-    desc.name		= (group.empty() ? name : group + '.' + name);
+    desc.name		= name;
     desc.description	= description;
     desc.read_only	= false;
     desc.dynamic_typing = false;
@@ -261,13 +255,12 @@ DDynamicReconfigure::registerEnumVariable(const std::string& name, T* variable,
 					  const std::string& description,
 					  const std::map<std::string, T>&
 							enum_dict,
-					  const std::string& enum_description,
-					  const std::string& group)
+					  const std::string& enum_description)
 {
     registerEnumVariable(name, *variable,
 			 std::function<void(const T&)>(
 			     [variable](const T& value){ *variable = value; }),
-			 description, enum_dict, enum_description, group);
+			 description, enum_dict, enum_description);
 }
 
 template <class T> void
@@ -278,8 +271,7 @@ DDynamicReconfigure::registerEnumVariable(const std::string& name,
 					  const std::string& description,
 					  const std::map<std::string, T>&
 							enum_dict,
-					  const std::string& enum_description,
-					  const std::string& group)
+					  const std::string& enum_description)
 {
     if (enum_dict.empty())
 	throw std::runtime_error("Trying to register an empty enum");
@@ -293,7 +285,7 @@ DDynamicReconfigure::registerEnumVariable(const std::string& name,
     }
 
     auto	desc = param_range<T>(min, max).param_desc();
-    desc.name		= (group.empty() ? name : group + '.' + name);
+    desc.name		= name;
     desc.description	= description;
     desc.read_only	= false;
     desc.dynamic_typing = false;
@@ -311,8 +303,8 @@ DDynamicReconfigure::registerVariable(const std::string& name, T* variable,
 				      const std::string& description,
 				      T min, T max, const std::string& group)
 {
-    registerVariable(name, variable, description,
-		     param_range<T>(min, max, 0), group);
+    registerVariable((group.empty() ? name : group + '.' + name),
+		     variable, description, param_range<T>(min, max, 0));
 }
 
 template <class T> void
@@ -322,8 +314,8 @@ DDynamicReconfigure::registerVariable(const std::string& name,
 				      const std::string& description,
 				      T min, T max, const std::string& group)
 {
-    registerVariable(name, current_value, description,
-		     param_range<T>(min, max, 0), group);
+    registerVariable((group.empty() ? name : group + '.' + name),
+		     current_value, description, param_range<T>(min, max, 0));
 }
 
 }	// namespace ddynamic_reconfigure2
