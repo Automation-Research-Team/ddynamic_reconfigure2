@@ -304,7 +304,7 @@ DDynamicReconfigure::registerVariable(const std::string& name, T* variable,
 				      T min, T max, const std::string& group)
 {
     registerVariable((group.empty() ? name : group + '.' + name),
-		     variable, description, param_range<T>(min, max, 0));
+		     variable, description, param_range<T>(min, max));
 }
 
 template <class T> void
@@ -315,7 +315,7 @@ DDynamicReconfigure::registerVariable(const std::string& name,
 				      T min, T max, const std::string& group)
 {
     registerVariable((group.empty() ? name : group + '.' + name),
-		     current_value, description, param_range<T>(min, max, 0));
+		     current_value, description, param_range<T>(min, max));
 }
 
 }	// namespace ddynamic_reconfigure2
