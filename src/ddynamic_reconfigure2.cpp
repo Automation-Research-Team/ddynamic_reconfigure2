@@ -71,7 +71,7 @@ DDynamicReconfigure::registerParameter(const param_desc_t& desc,
 				       const T& current_value,
 				       const std::function<void(const T&)>& cb)
 {
-    std::cerr << desc << std::endl;
+    // std::cerr << desc << std::endl;
 
     _node->declare_parameter(desc.name, current_value, desc);
 

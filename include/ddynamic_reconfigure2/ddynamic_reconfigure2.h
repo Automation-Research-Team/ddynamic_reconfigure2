@@ -276,8 +276,8 @@ DDynamicReconfigure::registerEnumVariable(const std::string& name,
     if (enum_dict.empty())
 	throw std::runtime_error("Trying to register an empty enum");
 
-    T	min = enum_dict.begin()->second;
-    T	max = min;
+    auto	min = enum_dict.begin()->second;
+    auto	max = min;
     for (const auto& val : enum_dict)
     {
 	min = (min < val.second ? min : val.second);
