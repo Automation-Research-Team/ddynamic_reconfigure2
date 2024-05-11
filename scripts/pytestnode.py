@@ -83,23 +83,23 @@ class TestNode(Node):
         self._ddr.register_variable('params_b',
                                     ParameterType.PARAMETER_BOOL_ARRAY,
                                     self._params_b,
-                                    lambda x: setattr(self, '_param_b', x),
-                                    'parameter of bool type')
+                                    lambda x: setattr(self, '_params_b', x),
+                                    'parameter of bool array type')
         self._ddr.register_variable('numeric.params_i64',
                                     ParameterType.PARAMETER_INTEGER_ARRAY,
                                     self._params_i64,
                                     lambda x: setattr(self, '_params_i64', x),
-                                    'parameter array of int64_t type')
+                                    'parameter of int64_t array type')
         self._ddr.register_variable('numeric.params_d',
                                     ParameterType.PARAMETER_DOUBLE_ARRAY,
                                     self._params_d,
                                     lambda x: setattr(self, '_params_d', x),
-                                    'parameter array of double type')
+                                    'parameter of double array type')
         self._ddr.register_variable('string.params_s',
                                     ParameterType.PARAMETER_STRING_ARRAY,
                                     self._params_s,
                                     lambda x: setattr(self, '_params_s', x),
-                                    'parameter array of string type')
+                                    'parameter of string array type')
         self._ddr.register_enum_variable('numeric.enum_param_d',
                                          ParameterType.PARAMETER_DOUBLE,
                                          self._enum_param_d,
