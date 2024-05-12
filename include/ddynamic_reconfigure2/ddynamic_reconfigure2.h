@@ -46,19 +46,7 @@ namespace ddynamic_reconfigure2
 /************************************************************************
 *  class param_range<T, N>						*
 ************************************************************************/
-namespace detail
-{
-  template <class T> static T	check_element(std::vector<T>)		;
-  template <class T> static T	check_element(T)			;
-
-  template <class T>
-  using element_t = decltype(check_element(std::declval<T>()));
-  template <class T>
-  using is_scalar = std::is_same<T, element_t<T> >;
-}
-
-template <class T, bool=std::is_same<int64_t, T>::value ||
-		        std::is_same<double,  T>::value>
+template <class T, bool=!std::is_same_v<T, bool> && std::is_arithmetic_v<T> >
 class param_range;
 
 template <class T>
@@ -69,7 +57,7 @@ class param_range<T, true>
 
   private:
     using range_t   = std::conditional_t<
-			  std::is_same<element_t, int64_t>::value,
+			  std::is_integral_v<element_t>,
 			  rcl_interfaces::msg::IntegerRange,
 			  rcl_interfaces::msg::FloatingPointRange>;
 
@@ -77,24 +65,21 @@ class param_range<T, true>
     param_range(element_t from_value=std::numeric_limits<element_t>::min(),
 		element_t to_value  =std::numeric_limits<element_t>::max(),
 		element_t step=0)
-	:_from_value(from_value), _to_value(to_value), _step(step)
     {
+	_range.from_value = from_value;
+	_range.to_value	  = to_value;
+	_range.step	  = step;
     }
 
     rcl_interfaces::msg::ParameterDescriptor
     param_desc() const
     {
-	range_t	range;
-	range.from_value = _from_value;
-	range.to_value   = _to_value;
-	range.step       = _step;
-
-	return set_range(range);
+	return param_desc(_range);
     }
 
   private:
-    rcl_interfaces::msg::ParameterDescriptor
-    set_range(const rcl_interfaces::msg::IntegerRange& range) const
+    static rcl_interfaces::msg::ParameterDescriptor
+    param_desc(const rcl_interfaces::msg::IntegerRange& range)
     {
 	rcl_interfaces::msg::ParameterDescriptor	desc;
 	desc.type = rcl_interfaces::msg::ParameterType::PARAMETER_INTEGER;
@@ -103,8 +88,8 @@ class param_range<T, true>
 	return desc;
     }
 
-    rcl_interfaces::msg::ParameterDescriptor
-    set_range(const rcl_interfaces::msg::FloatingPointRange& range) const
+    static rcl_interfaces::msg::ParameterDescriptor
+    param_desc(const rcl_interfaces::msg::FloatingPointRange& range)
     {
 	rcl_interfaces::msg::ParameterDescriptor	desc;
 	desc.type = rcl_interfaces::msg::ParameterType::PARAMETER_DOUBLE;
@@ -114,28 +99,30 @@ class param_range<T, true>
     }
 
   private:
-    element_t	_from_value;
-    element_t	_to_value;
-    element_t	_step;
+    range_t	_range;
 };
 
 template <class T>
 class param_range<T, false>
 {
+  private:
+    template <class T_> static T_	check_element(std::vector<T_>)	;
+    template <class T_> static T_	check_element(T_)		;
+
   public:
-    using element_t = detail::element_t<T>;
+    using element_t = decltype(check_element(std::declval<T>()));
 
   private:
     constexpr static uint8_t
-	_type = (detail::is_scalar<T>::value ?
-		 (std::is_same<element_t, bool>::value ?
+        _type = (std::is_same_v<T, element_t> ?
+		 (std::is_same_v<element_t, bool> ?
 		  rcl_interfaces::msg::ParameterType::PARAMETER_BOOL :
 		  rcl_interfaces::msg::ParameterType::PARAMETER_STRING) :
-		 (std::is_same<element_t, bool>::value ?
+		 (std::is_same_v<element_t, bool> ?
 		  rcl_interfaces::msg::ParameterType::PARAMETER_BOOL_ARRAY :
-		  std::is_same<element_t, int64_t>::value ?
+		  std::is_integral_v<element_t> ?
 		  rcl_interfaces::msg::ParameterType::PARAMETER_INTEGER_ARRAY :
-		  std::is_same<element_t, double>::value ?
+		  std::is_floating_point_v<element_t> ?
 		  rcl_interfaces::msg::ParameterType::PARAMETER_DOUBLE_ARRAY :
 		  rcl_interfaces::msg::ParameterType::PARAMETER_STRING_ARRAY));
 
@@ -315,7 +302,19 @@ DDynamicReconfigure::registerVariable(const std::string& name,
 				      T min, T max, const std::string& group)
 {
     registerVariable((group.empty() ? name : group + '.' + name),
-		     current_value, description, param_range<T>(min, max));
+		     current_value, cb, description, param_range<T>(min, max));
 }
 
+template <class T> void
+DDynamicReconfigure::registerParameter(const param_desc_t& desc,
+				       const T& current_value,
+				       const std::function<void(const T&)>& cb)
+{
+    _node->declare_parameter(desc.name, current_value, desc);
+
+    _param_cb_handles.emplace_back(
+	_param_event_handler.add_parameter_callback(
+	    desc.name,
+	    [cb](const rclcpp::Parameter& param){cb(param.get_value<T>());}));
+}
 }	// namespace ddynamic_reconfigure2

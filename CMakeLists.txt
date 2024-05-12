@@ -19,7 +19,8 @@ add_library(
 
 target_compile_features(
   ${PROJECT_NAME} PUBLIC
-    c_std_99 cxx_std_17)  # Require C99 and C++17
+    c_std_99 cxx_std_17  # Require C99 and C++17
+)
 
 target_include_directories(
   ${PROJECT_NAME} PUBLIC
@@ -39,24 +40,30 @@ ament_target_dependencies(
 
 ament_export_targets(export_${PROJECT_NAME} HAS_LIBRARY_TARGET)
 
+install(
+  TARGETS ${PROJECT_NAME}
+  EXPORT export_${PROJECT_NAME}
+)
+
 add_executable(
   testnode
     src/testnode.cpp
 )
 
-ament_target_dependencies(
-  testnode
-    rclcpp
-)
-
 target_compile_features(
   testnode PUBLIC
-    c_std_99 cxx_std_17)  # Require C99 and C++17
+    c_std_99 cxx_std_17  # Require C99 and C++17
+)
 
 target_include_directories(
   testnode PUBLIC
     $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
     $<INSTALL_INTERFACE:include>
+)
+
+ament_target_dependencies(
+  testnode
+    rclcpp
 )
 
 target_link_libraries(
@@ -65,33 +72,24 @@ target_link_libraries(
 )
 
 install(
+  TARGETS testnode
+  DESTINATION lib/${PROJECT_NAME}
+)
+
+install(
   DIRECTORY include/
   DESTINATION include
 )
 
-install(TARGETS
-  ${PROJECT_NAME}
-  EXPORT export_${PROJECT_NAME}
-  ARCHIVE DESTINATION lib
-  LIBRARY DESTINATION lib
-  RUNTIME DESTINATION bin
-  INCLUDES DESTINATION include
-)
-
-install(TARGETS
-  testnode
-  DESTINATION lib/${PROJECT_NAME}
-)
-
-install(DIRECTORY
-  launch
+install(
+  DIRECTORY launch
   DESTINATION share/${PROJECT_NAME}/
 )
 
 ament_python_install_package(${PROJECT_NAME})
 
-install(PROGRAMS
-  scripts/pytestnode.py
+install(
+  PROGRAMS scripts/pytestnode.py
   DESTINATION lib/${PROJECT_NAME}
 )
 

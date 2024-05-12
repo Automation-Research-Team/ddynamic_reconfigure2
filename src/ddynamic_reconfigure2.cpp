@@ -41,47 +41,8 @@
 namespace ddynamic_reconfigure2
 {
 /************************************************************************
-*  static functions							*
-************************************************************************/
-static std::ostream&
-operator <<(std::ostream& out,
-	    const rcl_interfaces::msg::ParameterDescriptor& desc)
-{
-    out << "name: " << desc.name
-	<< "\ntype: " << int(desc.type)
-	<< "\ndescription: " << desc.description
-	<< "\nadditional_constraints: " << desc.additional_constraints
-	<< "\nread_only: " << desc.read_only
-	<< "\nfloating_point_range:";
-    for (const auto& range : desc.floating_point_range)
-	out << " [" << range.from_value << "," << range.to_value
-	    << ':' << range.step << ']';
-    out << "\ninteger_range:";
-    for (const auto& range : desc.integer_range)
-	out << " [" << range.from_value << "," << range.to_value
-	    << ':' << range.step << ']';
-    return out << std::endl;
-}
-
-/************************************************************************
 *  class DDynamicReconfigure						*
 ************************************************************************/
-template <class T> void
-DDynamicReconfigure::registerParameter(const param_desc_t& desc,
-				       const T& current_value,
-				       const std::function<void(const T&)>& cb)
-{
-    // std::cerr << desc << std::endl;
-
-    _node->declare_parameter(desc.name, current_value, desc);
-
-    _param_cb_handles.emplace_back(
-	_param_event_handler.add_parameter_callback(
-	    desc.name,
-	    [cb](const rclcpp::Parameter& param){cb(param.get_value<T>());}));
-}
-
-// Instantiations
 template void	DDynamicReconfigure::registerParameter(
 		    const param_desc_t& desc, const bool& current_value,
 		    const std::function<void(const bool&)>& cb)		;
@@ -113,5 +74,4 @@ template void	DDynamicReconfigure::registerParameter(
 		    const std::vector<std::string>& current_value,
 		    const std::function<
 				void(const std::vector<std::string>&)>& cb);
-
 }	// namespace ddynamic_reconfigure2
