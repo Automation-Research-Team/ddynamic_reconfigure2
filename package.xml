@@ -3,10 +3,10 @@
 <package format="3">
   <name>ddynamic_reconfigure2</name>
   <version>1.0.0</version>
-  <description>The ddynamic_reconfigure2 is a ROS2 replacement of ddynamic_reconfigure packafge of ROS1</description>
+  <description>The ddynamic_reconfigure2 is a ROS2 replacement of ROS1's ddynamic_reconfigure package</description>
   <author>Toshio UESHIBA</author>
   <maintainer email="t.ueshiba@paist.go.jp">Toshio UESHIBA</maintainer>
-  <license>Apache-2.0</license>
+  <license>BSD</license>
 
   <buildtool_depend>ament_cmake</buildtool_depend>
   <buildtool_depend>ament_cmake_python</buildtool_depend>
