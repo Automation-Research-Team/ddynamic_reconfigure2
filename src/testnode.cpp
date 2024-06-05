@@ -89,8 +89,8 @@ TestNode::TestNode(const std::string& node_name,
     _ddr.registerVariable("param_b", &_param_b, "parameter of bool type");
     _ddr.registerVariable("numeric.param_i64", &_param_i64,
 			  "parameter of int64_t type", {-4, 10, 2});
-    _ddr.registerVariable("param_d", &_param_d,
-			  "parameter of double type", -1.0, 2.0, "numeric");
+    _ddr.registerVariable("numeric.param_d", &_param_d,
+			  "parameter of double type", {-1.0, 2.0});
     _ddr.registerVariable("string.param_s", &_param_s,
 			  "parameter of string type");
     _ddr.registerVariable("params_b", &_params_b,

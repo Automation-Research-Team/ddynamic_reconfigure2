@@ -158,6 +158,9 @@ class DDynamicReconfigure
 		}
 
     template <class T>
+    T		declare_read_only_parameter(const std::string& name,
+					    const T& default_value)	;
+    template <class T>
     void	registerVariable(const std::string& name, T* variable,
 				 const std::string& description="",
 				 const param_range<T>& range={})	;
@@ -182,22 +185,6 @@ class DDynamicReconfigure
 						enum_dict={},
 				     const std::string& enum_description="");
 
-  // For compatibility with ROS1's ddynamic_reconfigure
-    template <class T>
-    void	registerVariable(const std::string& name, T* variable,
-				 const std::string& description,
-				 T min, T max,
-				 const std::string& group="")		;
-    template <class T>
-    void	registerVariable(const std::string& name,
-				 const T& current_value,
-				 const std::function<void(const T&)>& cb,
-				 const std::string& description,
-				 T min, T max,
-				 const std::string& group="")		;
-    void	publishServicesTopics()					{}
-    void	publishServicesTopicsAndUpdateConfigData()		{}
-
   private:
     template <class T>
     void	registerParameter(const param_desc_t& desc,
@@ -209,6 +196,20 @@ class DDynamicReconfigure
     rclcpp::ParameterEventHandler	_param_event_handler;
     std::list<param_cb_handle_p>	_param_cb_handles;
 };
+
+template <class T> T
+DDynamicReconfigure::declare_read_only_parameter(const std::string& name,
+						 const T& default_value)
+{
+    auto	desc = param_range<T>().param_desc();
+    desc.name			= name;
+    desc.read_only		= true;
+    desc.integer_range		= {};
+    desc.floating_point_range	= {};
+    desc.dynamic_typing		= false;
+
+    return _node->declare_parameter<T>(name, default_value, desc);
+}
 
 template <class T> void
 DDynamicReconfigure::registerVariable(const std::string& name, T* variable,
@@ -283,26 +284,6 @@ DDynamicReconfigure::registerEnumVariable(const std::string& name,
     desc.additional_constraints = json.dump();
 
     registerParameter(desc, current_value, cb);
-}
-
-template <class T> void
-DDynamicReconfigure::registerVariable(const std::string& name, T* variable,
-				      const std::string& description,
-				      T min, T max, const std::string& group)
-{
-    registerVariable((group.empty() ? name : group + '.' + name),
-		     variable, description, param_range<T>(min, max));
-}
-
-template <class T> void
-DDynamicReconfigure::registerVariable(const std::string& name,
-				      const T& current_value,
-				      const std::function<void(const T&)>& cb,
-				      const std::string& description,
-				      T min, T max, const std::string& group)
-{
-    registerVariable((group.empty() ? name : group + '.' + name),
-		     current_value, cb, description, param_range<T>(min, max));
 }
 
 template <class T> void
