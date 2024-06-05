@@ -36,7 +36,7 @@
 /*!
  *  \file	testnode.cpp
  */
-#include <ddynamic_reconfigure2/ddynamic_reconfigure2.h>
+#include <ddynamic_reconfigure2/ddynamic_reconfigure2.hpp>
 
 namespace ddynamic_reconfigure2
 {
