@@ -43,6 +43,14 @@
 
 namespace ddynamic_reconfigure2
 {
+template <class T> static std::ostream&
+operator <<(std::ostream& out, const std::vector<T>& v)
+{
+    for (const auto& val : v)
+	out << ' ' << val;
+    return out;
+}
+
 /************************************************************************
 *  class param_range<T, N>						*
 ************************************************************************/
@@ -262,7 +270,11 @@ DDynamicReconfigure::registerEnumVariable(const std::string& name,
 					  const std::string& enum_description)
 {
     if (enum_dict.empty())
-	throw std::runtime_error("Trying to register an empty enum");
+    {
+	RCLCPP_ERROR_STREAM(_node->get_logger(),
+			    "Trying to register an empty enum");
+	throw;
+    }
 
     auto	min = enum_dict.begin()->second;
     auto	max = min;
@@ -296,6 +308,12 @@ DDynamicReconfigure::registerParameter(const param_desc_t& desc,
     _param_cb_handles.emplace_back(
 	_param_event_handler.add_parameter_callback(
 	    desc.name,
-	    [cb](const rclcpp::Parameter& param){cb(param.get_value<T>());}));
+	    [cb, this](const rclcpp::Parameter& param)
+	    {
+		cb(param.get_value<T>());
+		RCLCPP_DEBUG_STREAM(_node->get_logger(),
+				    "Set parameter\"" << param.get_name()
+				    << "\" to " << param.get_value<T>());
+	    }));
 }
 }	// namespace ddynamic_reconfigure2

@@ -40,22 +40,13 @@
 
 namespace ddynamic_reconfigure2
 {
-template <class T> static std::ostream&
-operator <<(std::ostream& out, const std::vector<T>& v)
-{
-    for (const auto& val : v)
-	out << ' ' << val;
-    return out;
-}
-
 /************************************************************************
 *  class TestNode							*
 ************************************************************************/
 class TestNode : public rclcpp::Node
 {
   public:
-    TestNode(const std::string& node_name,
-	     const rclcpp::NodeOptions& options=rclcpp::NodeOptions())	;
+    TestNode(const rclcpp::NodeOptions& options=rclcpp::NodeOptions())	;
 
   private:
     void	timer_cb()						;
@@ -75,9 +66,8 @@ class TestNode : public rclcpp::Node
     std::string				_enum_param_s;
 };
 
-TestNode::TestNode(const std::string& node_name,
-		   const rclcpp::NodeOptions& options)
-    :rclcpp::Node(node_name, options),
+TestNode::TestNode(const rclcpp::NodeOptions& options)
+    :rclcpp::Node("testnode", options),
      _timer(nullptr),
      _ddr(rclcpp::Node::SharedPtr(this)),
      _param_b(true), _param_i64(4), _param_d(0.5), _param_s("str0"),
@@ -139,7 +129,7 @@ main(int argc, char* argv[])
 {
     rclcpp::init(argc, argv);
 
-    auto node = std::make_shared<ddynamic_reconfigure2::TestNode>("testnode");
+    auto	node = std::make_shared<ddynamic_reconfigure2::TestNode>();
     rclcpp::spin(node);
     rclcpp::shutdown();
 
