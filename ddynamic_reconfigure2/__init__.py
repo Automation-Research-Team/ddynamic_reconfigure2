@@ -35,7 +35,7 @@
 #
 import json
 from rclpy.node                    import Node
-#from rclpy.parameter_event_handler import ParameterEventHandler
+from rclpy.parameter_event_handler import ParameterEventHandler
 from rcl_interfaces.msg            import (ParameterDescriptor, ParameterType,
                                            IntegerRange, FloatingPointRange)
 
@@ -47,7 +47,7 @@ class DDynamicReconfigure(object):
         super().__init__()
 
         self._node = node
-        #self._param_event_handler = ParameterEventHandler(self._node)
+        self._param_event_handler = ParameterEventHandler(self._node)
         self._param_cb_handles = []
 
     def register_variable(self, param_name, param_type, current_value, cb,
@@ -90,6 +90,6 @@ class DDynamicReconfigure(object):
 
     def _register_parameter(self, desc, current_value, cb):
         self._node.declare_parameter(desc.name, current_value, desc)
-        # self._param_cb_handles.append(
-        #     self._param_event_handler.add_parameter_callback(
-        #         desc.name, self.get_name(), lambda param: cb(param.value)))
+        self._param_cb_handles.append(
+            self._param_event_handler.add_parameter_callback(
+                desc.name, self.get_name(), lambda param: cb(param.value)))
