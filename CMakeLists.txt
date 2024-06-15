@@ -22,24 +22,13 @@ find_package(nlohmann_json REQUIRED)
 #  shared library: libddynamic_reconfigure2.so  #
 #################################################
 add_library(
-  ${PROJECT_NAME} SHARED
-    src/ddynamic_reconfigure2.cpp
+  ${PROJECT_NAME} INTERFACE
 )
 
 target_include_directories(
-  ${PROJECT_NAME} PUBLIC
+  ${PROJECT_NAME} INTERFACE
     $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
     $<INSTALL_INTERFACE:include>
-)
-
-target_compile_definitions(
-  ${PROJECT_NAME} PRIVATE
-    COMPOSITION_BUILDING_DLL
-)
-
-ament_target_dependencies(
-  ${PROJECT_NAME} PUBLIC
-    rclcpp
 )
 
 install(
@@ -50,9 +39,6 @@ install(
 install(
   TARGETS  ${PROJECT_NAME}
   EXPORT   export_${PROJECT_NAME}
-  LIBRARY  DESTINATION lib
-  ARCHIVE  DESTINATION lib
-  RUNTIME  DESTINATION bin
   INCLUDES DESTINATION include
 )
 
@@ -67,8 +53,7 @@ add_executable(
 )
 
 target_include_directories(
-  testnode
-  PUBLIC
+  testnode PUBLIC
     $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
     $<INSTALL_INTERFACE:include>
 )
@@ -96,6 +81,11 @@ install(
 ##################
 #  launch files  #
 ##################
+install(
+  DIRECTORY include/
+  DESTINATION include
+)
+
 install(
   DIRECTORY launch
   DESTINATION share/${PROJECT_NAME}/
