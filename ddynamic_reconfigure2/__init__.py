@@ -83,13 +83,14 @@ class DDynamicReconfigure(object):
                                                    step=step))
         elif param_type == ParameterType.PARAMETER_DOUBLE and \
              min_value is not None and max_value is not None:
-            desc.integer_range.append(FloatingPointRange(from_value=min_value,
-                                                         to_value=max_value,
-                                                         step=float(step)))
+            desc.floating_point_range.append(
+                FloatingPointRange(from_value=min_value, to_value=max_value,
+                                   step=float(step)))
         return desc
 
     def _register_parameter(self, desc, current_value, cb):
         self._node.declare_parameter(desc.name, current_value, desc)
         self._param_cb_handles.append(
             self._param_event_handler.add_parameter_callback(
-                desc.name, self.get_name(), lambda param: cb(param.value)))
+                desc.name, self._node.get_name(),
+                lambda param: cb(param.value)))
