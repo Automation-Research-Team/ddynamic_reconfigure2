@@ -93,4 +93,26 @@ class DDynamicReconfigure(object):
         self._param_cb_handles.append(
             self._param_event_handler.add_parameter_callback(
                 desc.name, self._node.get_name(),
-                lambda param: cb(param.value)))
+                lambda param: cb(DDynamicReconfigure._param_value(param.value))))
+
+    def _param_value(param):
+        if param.type == ParameterType.PARAMETER_BOOL:
+            return param.bool_value
+        elif param.type == ParameterType.PARAMETER_INTEGER:
+            return param.integer_value
+        elif param.type == ParameterType.PARAMETER_DOUBLE:
+            return param.double_value
+        elif param.type == ParameterType.PARAMETER_STRING:
+            return param.string_value
+        elif param.type == ParameterType.PARAMETER_BYTE_ARRAY:
+            return param.byte_array_value
+        elif param.type == ParameterType.PARAMETER_BOOL_ARRAY:
+            return param.bool_array_value
+        elif param.type == ParameterType.PARAMETER_INTEGER_ARRAY:
+            return param.integer_array_value
+        elif param.type == ParameterType.PARAMETER_DOUBLE_ARRAY:
+            return param.double_array_value
+        elif param.type == ParameterType.PARAMETER_STRING_ARRAY:
+            return param.string_array_value
+        else:
+            return None
