@@ -71,7 +71,7 @@ class param_range<T, true>
 
   public:
     param_range(element_t from_value=std::numeric_limits<element_t>::min(),
-		element_t to_value  =std::numeric_limits<element_t>::max(),
+		element_t to_value=std::numeric_limits<element_t>::max(),
 		element_t step=0)
     {
 	_range.from_value = from_value;
@@ -80,29 +80,37 @@ class param_range<T, true>
     }
 
     rcl_interfaces::msg::ParameterDescriptor
-    param_desc() const
+    param_desc(const std::string& name) const
     {
-	return param_desc(_range);
+	return param_desc(name, _range);
     }
 
   private:
     static rcl_interfaces::msg::ParameterDescriptor
-    param_desc(const rcl_interfaces::msg::IntegerRange& range)
+    param_desc(const std::string& name,
+	       const rcl_interfaces::msg::IntegerRange& range)
     {
 	rcl_interfaces::msg::ParameterDescriptor	desc;
+	desc.name = name;
 	desc.type = rcl_interfaces::msg::ParameterType::PARAMETER_INTEGER;
 	desc.integer_range.push_back(range);
+	desc.read_only	    = false;
+	desc.dynamic_typing = false;
 
 	return desc;
     }
 
     static rcl_interfaces::msg::ParameterDescriptor
-    param_desc(const rcl_interfaces::msg::FloatingPointRange& range)
+    param_desc(const std::string& name,
+	       const rcl_interfaces::msg::FloatingPointRange& range)
     {
 	rcl_interfaces::msg::ParameterDescriptor	desc;
+	desc.name = name;
 	desc.type = rcl_interfaces::msg::ParameterType::PARAMETER_DOUBLE;
 	desc.floating_point_range.push_back(range);
-
+	desc.read_only	    = false;
+	desc.dynamic_typing = false;
+	
 	return desc;
     }
 
@@ -140,15 +148,37 @@ class param_range<T, false>
     }
 
     rcl_interfaces::msg::ParameterDescriptor
-    param_desc() const
+    param_desc(const std::string& name) const
     {
 	rcl_interfaces::msg::ParameterDescriptor	desc;
-	desc.type = _type;
+	desc.name	    = name;
+	desc.type	    = _type;
+	desc.read_only	    = false;
+	desc.dynamic_typing = false;
 
 	return desc;
     }
 };
 
+template <class T> rcl_interfaces::msg::ParameterDescriptor
+read_only_param_desc(const std::string& name)
+{
+    auto	desc = param_range<T>().param_desc(name);
+    desc.read_only = true;
+
+    return desc;
+}
+    
+template <class T> rcl_interfaces::msg::ParameterDescriptor
+read_only_param_desc(const std::string& name,
+		     T from_value, T to_value, T step=0)
+{
+    auto desc = param_range<T>(from_value, to_value, step).param_desc(name);
+    desc.read_only = true;
+
+    return desc;
+}
+    
 /************************************************************************
 *  class DDynamicReconfigure						*
 ************************************************************************/
@@ -165,9 +195,6 @@ class DDynamicReconfigure
 		{
 		}
 
-    template <class T>
-    T		declare_read_only_parameter(const std::string& name,
-					    const T& default_value)	;
     template <class T>
     void	registerVariable(const std::string& name, T* variable,
 				 const std::string& description="",
@@ -205,20 +232,6 @@ class DDynamicReconfigure
     std::list<param_cb_handle_p>	_param_cb_handles;
 };
 
-template <class T> T
-DDynamicReconfigure::declare_read_only_parameter(const std::string& name,
-						 const T& default_value)
-{
-    auto	desc = param_range<T>().param_desc();
-    desc.name			= name;
-    desc.read_only		= true;
-    desc.integer_range		= {};
-    desc.floating_point_range	= {};
-    desc.dynamic_typing		= false;
-
-    return _node->declare_parameter<T>(name, default_value, desc);
-}
-
 template <class T> void
 DDynamicReconfigure::registerVariable(const std::string& name, T* variable,
 				      const std::string& description,
@@ -237,11 +250,8 @@ DDynamicReconfigure::registerVariable(const std::string& name,
 				      const std::string& description,
 				      const param_range<T>& range)
 {
-    auto	desc = range.param_desc();
-    desc.name		= name;
-    desc.description	= description;
-    desc.read_only	= false;
-    desc.dynamic_typing = false;
+    auto	desc = range.param_desc(name);
+    desc.description = description;
 
     registerParameter(desc, current_value, cb);
 }
@@ -284,11 +294,8 @@ DDynamicReconfigure::registerEnumVariable(const std::string& name,
 	max = (max > val.second ? max : val.second);
     }
 
-    auto	desc = param_range<T>(min, max).param_desc();
-    desc.name		= name;
-    desc.description	= description;
-    desc.read_only	= false;
-    desc.dynamic_typing = false;
+    auto	desc = param_range<T>(min, max).param_desc(name);
+    desc.description = description;
 
     nlohmann::json	json;
     json["enum_description"] = enum_description;
