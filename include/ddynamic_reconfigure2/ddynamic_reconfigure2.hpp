@@ -71,7 +71,7 @@ class param_range<T, true>
 
   public:
     param_range(element_t from_value=std::numeric_limits<element_t>::min(),
-		element_t to_value=std::numeric_limits<element_t>::max(),
+		element_t to_value  =std::numeric_limits<element_t>::max(),
 		element_t step=0)
     {
 	_range.from_value = from_value;
@@ -111,7 +111,7 @@ class param_range<T, true>
 	desc.type = rcl_interfaces::msg::ParameterType::PARAMETER_DOUBLE;
 	if (range.from_value != std::numeric_limits<element_t>::min() ||
 	    range.to_value   != std::numeric_limits<element_t>::max())
-	desc.floating_point_range.push_back(range);
+	    desc.floating_point_range.push_back(range);
 	desc.read_only	    = false;
 	desc.dynamic_typing = false;
 
