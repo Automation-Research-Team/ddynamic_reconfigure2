@@ -93,7 +93,9 @@ class param_range<T, true>
 	rcl_interfaces::msg::ParameterDescriptor	desc;
 	desc.name = name;
 	desc.type = rcl_interfaces::msg::ParameterType::PARAMETER_INTEGER;
-	desc.integer_range.push_back(range);
+	if (range.from_value != std::numeric_limits<element_t>::min() ||
+	    range.to_value   != std::numeric_limits<element_t>::max())
+	    desc.integer_range.push_back(range);
 	desc.read_only	    = false;
 	desc.dynamic_typing = false;
 
@@ -107,10 +109,12 @@ class param_range<T, true>
 	rcl_interfaces::msg::ParameterDescriptor	desc;
 	desc.name = name;
 	desc.type = rcl_interfaces::msg::ParameterType::PARAMETER_DOUBLE;
+	if (range.from_value != std::numeric_limits<element_t>::min() ||
+	    range.to_value   != std::numeric_limits<element_t>::max())
 	desc.floating_point_range.push_back(range);
 	desc.read_only	    = false;
 	desc.dynamic_typing = false;
-	
+
 	return desc;
     }
 
@@ -143,9 +147,7 @@ class param_range<T, false>
 		  rcl_interfaces::msg::ParameterType::PARAMETER_STRING_ARRAY));
 
   public:
-    param_range(element_t=element_t(), element_t=element_t())
-    {
-    }
+    param_range(element_t=element_t(), element_t=element_t())		{}
 
     rcl_interfaces::msg::ParameterDescriptor
     param_desc(const std::string& name) const
@@ -168,7 +170,7 @@ read_only_param_desc(const std::string& name)
 
     return desc;
 }
-    
+
 template <class T> rcl_interfaces::msg::ParameterDescriptor
 read_only_param_desc(const std::string& name,
 		     T from_value, T to_value, T step=0)
@@ -178,7 +180,7 @@ read_only_param_desc(const std::string& name,
 
     return desc;
 }
-    
+
 /************************************************************************
 *  class DDynamicReconfigure						*
 ************************************************************************/
