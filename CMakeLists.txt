@@ -18,9 +18,9 @@ find_package(rclcpp REQUIRED)
 find_package(rclpy REQUIRED)
 find_package(nlohmann_json REQUIRED)
 
-#################################################
-#  shared library: libddynamic_reconfigure2.so  #
-#################################################
+####################################################
+#  header only library: ddynamic_reconfigure2.hpp  #
+####################################################
 add_library(
   ${PROJECT_NAME} INTERFACE
 )
@@ -30,19 +30,6 @@ target_include_directories(
     $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
     $<INSTALL_INTERFACE:include>
 )
-
-install(
-  DIRECTORY include/
-  DESTINATION include
-)
-
-install(
-  TARGETS  ${PROJECT_NAME}
-  EXPORT   export_${PROJECT_NAME}
-  INCLUDES DESTINATION include
-)
-
-ament_export_targets(export_${PROJECT_NAME} HAS_LIBRARY_TARGET)
 
 ##############################
 #  cpp executable: testnode  #
@@ -63,14 +50,9 @@ ament_target_dependencies(
     rclcpp
 )
 
-install(
-  TARGETS testnode
-  DESTINATION lib/${PROJECT_NAME}
-)
-
-###################################
-#  python executable: pytestnode  #
-###################################
+###############################################
+#  python library and executable: pytestnode  #
+###############################################
 ament_python_install_package(${PROJECT_NAME})
 
 install(
@@ -78,13 +60,34 @@ install(
   DESTINATION lib/${PROJECT_NAME}
 )
 
-##################
-#  launch files  #
-##################
+#############
+#  install  #
+#############
+install(
+  TARGETS  ${PROJECT_NAME}
+  EXPORT   export_${PROJECT_NAME}
+  INCLUDES DESTINATION include
+)
+
+install(
+  TARGETS testnode
+  DESTINATION lib/${PROJECT_NAME}
+)
+
+install(
+  DIRECTORY include/
+  DESTINATION include
+)
+
 install(
   DIRECTORY launch
   DESTINATION share/${PROJECT_NAME}/
 )
+
+############
+#  export  #
+############
+ament_export_targets(export_${PROJECT_NAME} HAS_LIBRARY_TARGET)
 
 ##########
 #  test  #
