@@ -35,6 +35,7 @@
 #
 import json
 from rclpy.node                    import Node
+from rclpy.parameter               import Parameter, parameter_value_to_python
 from rclpy.parameter_event_handler import ParameterEventHandler
 from rcl_interfaces.msg            import (ParameterDescriptor, ParameterType,
                                            IntegerRange, FloatingPointRange)
@@ -50,38 +51,40 @@ class DDynamicReconfigure(object):
         self._param_event_handler = ParameterEventHandler(self._node)
         self._param_cb_handles = []
 
-    def register_variable(self, param_name, param_type, current_value, cb,
-                          description='',
+    def register_variable(self, param_name, current_value, cb, description='',
                           min_value=None, max_value=None, step=0):
-        self._register_parameter(self._create_desc(param_name, param_type,
-                                                   description,
-                                                   min_value, max_value, step),
+        self._register_parameter(DDynamicReconfigure.create_desc(
+                                     param_name, current_value, description,
+                                     min_value, max_value, step),
                                  current_value, cb)
 
-    def register_enum_variable(self, param_name, param_type, current_value, cb,
+    def register_enum_variable(self, param_name, current_value, cb,
                                description, enum_dict, enum_description=''):
-        desc = self._create_desc(param_name, param_type, description,
-                                 min(enum_dict.values()),
-                                 max(enum_dict.values()))
+        desc = DDynamicReconfigure.create_desc(param_name, current_value,
+                                               description,
+                                               min(enum_dict.values()),
+                                               max(enum_dict.values()))
         desc.additional_constraints \
             = json.dumps({'enum_description': enum_description,
                           'enum': enum_dict})
         self._register_parameter(desc, current_value, cb)
 
-    def _create_desc(self, param_name, param_type, description,
-                     min_value, max_value, step=0):
+    @staticmethod
+    def create_desc(param_name, current_value, description='',
+                    min_value=None, max_value=None, step=0):
         desc = ParameterDescriptor()
         desc.name           = param_name
-        desc.type           = param_type
+        desc.type           = Parameter.Type.from_parameter_value(
+                                  current_value)
         desc.description    = description
         desc.read_only      = False
         desc.dynamic_typing = False
-        if param_type == ParameterType.PARAMETER_INTEGER and \
+        if desc.type == ParameterType.PARAMETER_INTEGER and \
            min_value is not None and max_value is not None:
             desc.integer_range.append(IntegerRange(from_value=min_value,
                                                    to_value=max_value,
                                                    step=step))
-        elif param_type == ParameterType.PARAMETER_DOUBLE and \
+        elif desc.type == ParameterType.PARAMETER_DOUBLE and \
              min_value is not None and max_value is not None:
             desc.floating_point_range.append(
                 FloatingPointRange(from_value=min_value, to_value=max_value,
@@ -93,26 +96,14 @@ class DDynamicReconfigure(object):
         self._param_cb_handles.append(
             self._param_event_handler.add_parameter_callback(
                 desc.name, self._node.get_name(),
-                lambda param: cb(DDynamicReconfigure._param_value(param.value))))
+                lambda param: cb(parameter_value_to_python(param.value))))
 
-    def _param_value(param):
-        if param.type == ParameterType.PARAMETER_BOOL:
-            return param.bool_value
-        elif param.type == ParameterType.PARAMETER_INTEGER:
-            return param.integer_value
-        elif param.type == ParameterType.PARAMETER_DOUBLE:
-            return param.double_value
-        elif param.type == ParameterType.PARAMETER_STRING:
-            return param.string_value
-        elif param.type == ParameterType.PARAMETER_BYTE_ARRAY:
-            return param.byte_array_value
-        elif param.type == ParameterType.PARAMETER_BOOL_ARRAY:
-            return param.bool_array_value
-        elif param.type == ParameterType.PARAMETER_INTEGER_ARRAY:
-            return param.integer_array_value
-        elif param.type == ParameterType.PARAMETER_DOUBLE_ARRAY:
-            return param.double_array_value
-        elif param.type == ParameterType.PARAMETER_STRING_ARRAY:
-            return param.string_array_value
-        else:
-            return None
+#########################################################################
+#  utility functions                                                    #
+#########################################################################
+def declare_read_only_parameter(node, param_name, default_value):
+    desc = DDynamicReconfigure.create_desc(param_name, default_value)
+    desc.read_only = True
+    return parameter_value_to_python(
+               node.declare_parameter(
+                   desc.name, default_value, desc).get_parameter_value())

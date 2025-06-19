@@ -52,7 +52,7 @@ operator <<(std::ostream& out, const std::vector<T>& v)
 }
 
 /************************************************************************
-*  class param_range<T, N>						*
+*  class param_range<T, NUMERIC>					*
 ************************************************************************/
 template <class T, bool=!std::is_same_v<T, bool> && std::is_arithmetic_v<T> >
 class param_range;
@@ -83,6 +83,24 @@ class param_range<T, true>
     param_desc(const std::string& name) const
     {
 	return param_desc(name, _range);
+    }
+
+    bool
+    within(const element_t& value) const
+    {
+	return _range.from_value <= value & value <= _range.to_value;
+    }
+
+    element_t
+    from_value() const
+    {
+	return _range.from_value;
+    }
+
+    element_t
+    to_value() const
+    {
+	return _range.to_value;
     }
 
   private:
@@ -160,6 +178,10 @@ class param_range<T, false>
 
 	return desc;
     }
+
+    bool	within(const T&)		const	{ return true; }
+    T		from_value()			const	{ return {}; }
+    T		to_value()			const	{ return {}; }
 };
 
 template <class T> rcl_interfaces::msg::ParameterDescriptor
@@ -252,6 +274,17 @@ DDynamicReconfigure::registerVariable(const std::string& name,
 				      const std::string& description,
 				      const param_range<T>& range)
 {
+    if (!range.within(current_value))
+    {
+	RCLCPP_WARN_STREAM(_node->get_logger(),
+			   "Parameter[" << name
+			   << "] is not registered because current value["
+			   << current_value
+			   << "] is out of range[" << range.from_value()
+			   << ", " << range.to_value() << ']');
+	return;
+    }
+
     auto	desc = range.param_desc(name);
     desc.description = description;
 
@@ -324,5 +357,16 @@ DDynamicReconfigure::registerParameter(const param_desc_t& desc,
 				    "Set parameter\"" << param.get_name()
 				    << "\" to " << param.get_value<T>());
 	    }));
+}
+
+/************************************************************************
+*  utility functions							*
+************************************************************************/
+template <class T> T
+declare_read_only_parameter(rclcpp::Node* node,
+			    const std::string& name, const T& default_value)
+{
+    return node->declare_parameter(name, default_value,
+				   read_only_param_desc<T>(name));
 }
 }	// namespace ddynamic_reconfigure2

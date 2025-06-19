@@ -58,50 +58,31 @@ class TestNode(Node):
         self._enum_param_s = 'Two'
 
         self._ddr = DDynamicReconfigure(self)
-        self._ddr.register_variable('param_b',
-                                    ParameterType.PARAMETER_BOOL,
-                                    self._param_b,
+        self._ddr.register_variable('param_b', self._param_b,
                                     lambda x: setattr(self, '_param_b', x),
                                     'parameter of bool type')
-        self._ddr.register_variable('numeric.param_i64',
-                                    ParameterType.PARAMETER_INTEGER,
-                                    self._param_i64,
+        self._ddr.register_variable('numeric.param_i64', self._param_i64,
                                     lambda x: setattr(self, '_param_i64', x),
-                                    'parameter of int64_t type',
-                                    -4, 10, 2)
-        self._ddr.register_variable('numeric.param_d',
-                                    ParameterType.PARAMETER_DOUBLE,
-                                    self._param_d,
+                                    'parameter of int64_t type', -4, 10, 2)
+        self._ddr.register_variable('numeric.param_d', self._param_d,
                                     lambda x: setattr(self, '_param_d', x),
-                                    'parameter of double type',
-                                    -1.0, 2.0)
-        self._ddr.register_variable('string.param_s',
-                                    ParameterType.PARAMETER_STRING,
-                                    self._param_s,
+                                    'parameter of double type', -1.0, 2.0)
+        self._ddr.register_variable('string.param_s', self._param_s,
                                     lambda x: setattr(self, '_param_s', x),
                                     'parameter of string type')
-        self._ddr.register_variable('params_b',
-                                    ParameterType.PARAMETER_BOOL_ARRAY,
-                                    self._params_b,
+        self._ddr.register_variable('params_b', self._params_b,
                                     lambda x: setattr(self, '_params_b', x),
                                     'parameter of bool array type')
-        self._ddr.register_variable('numeric.params_i64',
-                                    ParameterType.PARAMETER_INTEGER_ARRAY,
-                                    self._params_i64,
+        self._ddr.register_variable('numeric.params_i64', self._params_i64,
                                     lambda x: setattr(self, '_params_i64', x),
                                     'parameter of int64_t array type')
-        self._ddr.register_variable('numeric.params_d',
-                                    ParameterType.PARAMETER_DOUBLE_ARRAY,
-                                    self._params_d,
+        self._ddr.register_variable('numeric.params_d', self._params_d,
                                     lambda x: setattr(self, '_params_d', x),
                                     'parameter of double array type')
-        self._ddr.register_variable('string.params_s',
-                                    ParameterType.PARAMETER_STRING_ARRAY,
-                                    self._params_s,
+        self._ddr.register_variable('string.params_s', self._params_s,
                                     lambda x: setattr(self, '_params_s', x),
                                     'parameter of string array type')
         self._ddr.register_enum_variable('numeric.enum_param_d',
-                                         ParameterType.PARAMETER_DOUBLE,
                                          self._enum_param_d,
                                          lambda x: setattr(self,
                                                            '_enum_param_d', x),
@@ -110,7 +91,6 @@ class TestNode(Node):
                                           'middle': 2.1, 'high': 3.2},
                                          'low/middle/high')
         self._ddr.register_enum_variable('string.enum_param_s',
-                                         ParameterType.PARAMETER_STRING,
                                          self._enum_param_s,
                                          lambda x: setattr(self,
                                                            '_enum_param_s', x),
