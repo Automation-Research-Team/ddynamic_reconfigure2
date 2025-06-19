@@ -70,14 +70,14 @@ class DDynamicReconfigure(object):
         self._register_parameter(desc, current_value, cb)
 
     @staticmethod
-    def create_desc(param_name, current_value, description='',
-                    min_value=None, max_value=None, step=0):
+    def create_desc(param_name, current_value, read_only=False,
+                    description='', min_value=None, max_value=None, step=0):
         desc = ParameterDescriptor()
         desc.name           = param_name
         desc.type           = Parameter.Type.from_parameter_value(
                                   current_value)
         desc.description    = description
-        desc.read_only      = False
+        desc.read_only      = read_only
         desc.dynamic_typing = False
         if desc.type == ParameterType.PARAMETER_INTEGER and \
            min_value is not None and max_value is not None:
@@ -102,8 +102,8 @@ class DDynamicReconfigure(object):
 #  utility functions                                                    #
 #########################################################################
 def declare_read_only_parameter(node, param_name, default_value):
-    desc = DDynamicReconfigure.create_desc(param_name, default_value)
-    desc.read_only = True
     return parameter_value_to_python(
                node.declare_parameter(
-                   desc.name, default_value, desc).get_parameter_value())
+                   param_name, default_value,
+                   DDynamicReconfigure.create_desc(
+                       param_name, default_value, True)).get_parameter_value())
