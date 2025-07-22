@@ -45,9 +45,9 @@ target_include_directories(
     $<INSTALL_INTERFACE:include>
 )
 
-ament_target_dependencies(
-  testnode
-    rclcpp
+target_link_libraries(
+  testnode PUBLIC
+    rclcpp::rclcpp
 )
 
 ###############################################
