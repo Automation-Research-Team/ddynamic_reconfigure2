@@ -53,7 +53,7 @@ class TestNode : public rclcpp::Node
 
   private:
     rclcpp::TimerBase::SharedPtr	_timer;
-    DDynamicReconfigure			_ddr;
+    DDynamicReconfigure<>		_ddr;
     bool				_param_b;
     int64_t				_param_i64;
     double				_param_d;

@@ -187,8 +187,9 @@ class param_range<T, false>
 };
 
 /************************************************************************
-*  class DDynamicReconfigure						*
+*  class DDynamicReconfigure<NODE>					*
 ************************************************************************/
+template <class NODE=rclcpp::Node>
 class DDynamicReconfigure
 {
   private:
@@ -196,7 +197,7 @@ class DDynamicReconfigure
     using param_desc_t	    = rcl_interfaces::msg::ParameterDescriptor;
 
   public:
-		DDynamicReconfigure(rclcpp::Node::SharedPtr node)
+		DDynamicReconfigure(const std::shared_ptr<NODE>& node)
 		    :_node(node),
 		     _param_event_handler(_node), _param_cb_handles()
 		{
@@ -234,15 +235,16 @@ class DDynamicReconfigure
 				  const std::function<void(const T&)>& cb);
 
   private:
-    rclcpp::Node::SharedPtr		_node;
+    std::shared_ptr<NODE>		_node;
     rclcpp::ParameterEventHandler	_param_event_handler;
     std::list<param_cb_handle_p>	_param_cb_handles;
 };
 
-template <class T> void
-DDynamicReconfigure::registerVariable(const std::string& name, T* variable,
-				      const std::string& description,
-				      const param_range<T>& range)
+template <class NODE> template <class T> void
+DDynamicReconfigure<NODE>::registerVariable(const std::string& name,
+					    T* variable,
+					    const std::string& description,
+					    const param_range<T>& range)
 {
     registerVariable(name, *variable,
 		     std::function<void(const T&)>([variable](const T& value)
@@ -250,12 +252,11 @@ DDynamicReconfigure::registerVariable(const std::string& name, T* variable,
 		     description, range);
 }
 
-template <class T> void
-DDynamicReconfigure::registerVariable(const std::string& name,
-				      const T& current_value,
-				      const std::function<void(const T&)>& cb,
-				      const std::string& description,
-				      const param_range<T>& range)
+template <class NODE> template <class T> void
+DDynamicReconfigure<NODE>::registerVariable(
+    const std::string& name, const T& current_value,
+    const std::function<void(const T&)>& cb, const std::string& description,
+    const param_range<T>& range)
 {
     if (!range.within(current_value))
     {
@@ -274,12 +275,11 @@ DDynamicReconfigure::registerVariable(const std::string& name,
     registerParameter(desc, current_value, cb);
 }
 
-template <class T> void
-DDynamicReconfigure::registerEnumVariable(const std::string& name, T* variable,
-					  const std::string& description,
-					  const std::map<std::string, T>&
-							enum_dict,
-					  const std::string& enum_description)
+template <class NODE> template <class T> void
+DDynamicReconfigure<NODE>::registerEnumVariable(
+    const std::string& name, T* variable, const std::string& description,
+    const std::map<std::string, T>& enum_dict,
+    const std::string& enum_description)
 {
     registerEnumVariable(name, *variable,
 			 std::function<void(const T&)>(
@@ -287,15 +287,12 @@ DDynamicReconfigure::registerEnumVariable(const std::string& name, T* variable,
 			 description, enum_dict, enum_description);
 }
 
-template <class T> void
-DDynamicReconfigure::registerEnumVariable(const std::string& name,
-					  const T& current_value,
-					  const std::function<void(const T&)>&
-							cb,
-					  const std::string& description,
-					  const std::map<std::string, T>&
-							enum_dict,
-					  const std::string& enum_description)
+template <class NODE> template <class T> void
+DDynamicReconfigure<NODE>::registerEnumVariable(
+    const std::string& name, const T& current_value,
+    const std::function<void(const T&)>& cb, const std::string& description,
+    const std::map<std::string, T>& enum_dict,
+    const std::string& enum_description)
 {
     if (enum_dict.empty())
     {
@@ -323,10 +320,10 @@ DDynamicReconfigure::registerEnumVariable(const std::string& name,
     registerParameter(desc, current_value, cb);
 }
 
-template <class T> void
-DDynamicReconfigure::registerParameter(const param_desc_t& desc,
-				       const T& current_value,
-				       const std::function<void(const T&)>& cb)
+template <class NODE> template <class T> void
+DDynamicReconfigure<NODE>::registerParameter(
+    const param_desc_t& desc, const T& current_value,
+    const std::function<void(const T&)>& cb)
 {
     _node->declare_parameter(desc.name, current_value, desc);
 
@@ -345,11 +342,20 @@ DDynamicReconfigure::registerParameter(const param_desc_t& desc,
 /************************************************************************
 *  utility functions							*
 ************************************************************************/
-template <class T> T
-declare_read_only_parameter(rclcpp::Node* node,
+template <class NODE_PTR, class T> T
+declare_read_only_parameter(const NODE_PTR& node,
 			    const std::string& name, const T& default_value)
 {
     return node->declare_parameter(name, default_value,
 				   param_range<T>().param_desc(name, true));
+}
+
+template <class NODE_PTR> std::string
+declare_read_only_parameter(const NODE_PTR& node,
+			    const std::string& name, const char* default_value)
+{
+    return node->declare_parameter(name, std::string(default_value),
+				   param_range<std::string>().param_desc(
+				       name, true));
 }
 }	// namespace ddynamic_reconfigure2
