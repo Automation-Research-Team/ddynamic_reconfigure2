@@ -88,7 +88,7 @@ class param_range<T, true>
     bool
     within(const element_t& value) const
     {
-	return _range.from_value <= value & value <= _range.to_value;
+	return _range.from_value <= value && value <= _range.to_value;
     }
 
     element_t
@@ -343,7 +343,7 @@ DDynamicReconfigure<NODE>::registerParameter(
 *  utility functions							*
 ************************************************************************/
 template <class NODE_PTR, class T> T
-declare_read_only_parameter(const NODE_PTR& node,
+declare_read_only_parameter(NODE_PTR&& node,
 			    const std::string& name, const T& default_value)
 {
     return node->declare_parameter(name, default_value,
@@ -351,11 +351,10 @@ declare_read_only_parameter(const NODE_PTR& node,
 }
 
 template <class NODE_PTR> std::string
-declare_read_only_parameter(const NODE_PTR& node,
+declare_read_only_parameter(NODE_PTR&& node,
 			    const std::string& name, const char* default_value)
 {
-    return node->declare_parameter(name, std::string(default_value),
-				   param_range<std::string>().param_desc(
-				       name, true));
+    return declare_read_only_parameter(std::forward<NODE_PTR>(node),
+				       name, std::string(default_value));
 }
 }	// namespace ddynamic_reconfigure2
