@@ -11,43 +11,25 @@ if(CMAKE_COMPILER_IS_GNUCXX OR CMAKE_CXX_COMPILER_ID MATCHES "Clang")
   add_compile_options(-Wall -Wextra -Wpedantic)
 endif()
 
-# find dependencies
-find_package(ament_cmake REQUIRED)
-find_package(ament_cmake_python REQUIRED)
-find_package(rclcpp REQUIRED)
-find_package(rclpy REQUIRED)
-find_package(nlohmann_json REQUIRED)
+##################
+#  dependencies  #
+##################
+find_package(ament_cmake_auto REQUIRED)
+ament_auto_find_build_dependencies()
 
 ####################################################
 #  header only library: ddynamic_reconfigure2.hpp  #
 ####################################################
-add_library(
+ament_auto_add_library(
   ${PROJECT_NAME} INTERFACE
-)
-
-target_include_directories(
-  ${PROJECT_NAME} INTERFACE
-    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
-    $<INSTALL_INTERFACE:include>
 )
 
 ##############################
 #  cpp executable: testnode  #
 ##############################
-add_executable(
+ament_auto_add_executable(
   testnode
     src/testnode.cpp
-)
-
-target_include_directories(
-  testnode PUBLIC
-    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
-    $<INSTALL_INTERFACE:include>
-)
-
-target_link_libraries(
-  testnode PUBLIC
-    rclcpp::rclcpp
 )
 
 ###############################################
@@ -59,35 +41,6 @@ install(
   PROGRAMS scripts/pytestnode.py
   DESTINATION lib/${PROJECT_NAME}
 )
-
-#############
-#  install  #
-#############
-install(
-  TARGETS  ${PROJECT_NAME}
-  EXPORT   export_${PROJECT_NAME}
-  INCLUDES DESTINATION include
-)
-
-install(
-  TARGETS testnode
-  DESTINATION lib/${PROJECT_NAME}
-)
-
-install(
-  DIRECTORY include/
-  DESTINATION include
-)
-
-install(
-  DIRECTORY launch
-  DESTINATION share/${PROJECT_NAME}/
-)
-
-############
-#  export  #
-############
-ament_export_targets(export_${PROJECT_NAME} HAS_LIBRARY_TARGET)
 
 ##########
 #  test  #
@@ -106,4 +59,7 @@ if(BUILD_TESTING)
   ament_lint_auto_find_test_dependencies()
 endif()
 
-ament_package()
+ament_auto_package(
+  USE_SCOPED_HEADER_INSTALL_DIR
+  INSTALL_TO_SHARE launch
+)
