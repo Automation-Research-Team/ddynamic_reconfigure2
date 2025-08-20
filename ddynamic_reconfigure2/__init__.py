@@ -33,10 +33,11 @@
 #
 # Author: Toshio Ueshiba
 #
-import json
+import rclpy, json, time
 from rclpy.node                    import Node
 from rclpy.parameter               import Parameter, parameter_value_to_python
 from rclpy.parameter_event_handler import ParameterEventHandler
+from rclpy.parameter_client        import AsyncParameterClient
 from rcl_interfaces.msg            import (ParameterDescriptor, ParameterType,
                                            IntegerRange, FloatingPointRange)
 
@@ -97,6 +98,31 @@ class DDynamicReconfigure(object):
             self._param_event_handler.add_parameter_callback(
                 desc.name, self._node.get_name(),
                 lambda param: cb(parameter_value_to_python(param.value))))
+
+#########################################################################
+#  class ParametrerClient                                               #
+#########################################################################
+class ParameterClient(AsyncParameterClient):
+    def __init__(self, node, remote_node_name,
+                 qos_profile=rclpy.qos.qos_profile_services_default,
+                 callback_group=None):
+        super().__init__(node, remote_node_name, qos_profile=qos_profile,
+                         callback_group=callback_group)
+
+    def get_parameters_sync(self, names):
+        future = self.get_parameters(names)
+        while not future.done():
+            time.sleep(0.1)
+        return [parameter_value_to_python(value)
+                for value in future.result().values]
+
+    def set_parameters_sync(self, params_dict):
+        parameters = [Parameter(name, value=value).to_parameter_msg()
+                      for name, value in params_dict.items()]
+        future = self.set_parameters(parameters)
+        while not future.done():
+            time.sleep(0.1)
+        return future.result()
 
 #########################################################################
 #  utility functions                                                    #
