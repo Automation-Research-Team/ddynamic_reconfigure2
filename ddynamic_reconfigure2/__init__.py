@@ -116,13 +116,14 @@ class ParameterClient(AsyncParameterClient):
         return [parameter_value_to_python(value)
                 for value in future.result().values]
 
-    def set_parameters_sync(self, params_dict):
-        parameters = [Parameter(name, value=value).to_parameter_msg()
-                      for name, value in params_dict.items()]
+    def set_parameters_sync(self, param_tuples):
+        parameters = [Parameter(param_tuple[0],
+                                value=param_tuple[1]).to_parameter_msg()
+                      for param_tuple in param_tuples]
         future = self.set_parameters(parameters)
         while not future.done():
             time.sleep(0.1)
-        return future.result()
+        return future.result().results
 
 #########################################################################
 #  utility functions                                                    #

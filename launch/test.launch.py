@@ -7,6 +7,7 @@ def generate_launch_description():
               package='ddynamic_reconfigure2',
               executable='testnode',
               output='screen',
-              parameters=[{'numeric.param_i64': -2, 'numeric.param_d': 1.6}]),
+              parameters=[{'numeric.param_i64': -2, 'numeric.param_d': 1.6,
+                           'string.enum_param_s': 'Three'}]),
          Node(name='rqt_reconfigure', package='rqt_reconfigure',
               executable='rqt_reconfigure', output='screen')])
