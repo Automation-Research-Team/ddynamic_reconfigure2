@@ -34,7 +34,7 @@
 #
 # Author: Toshio Ueshiba
 #
-import rclpy
+import rclpy, sys
 from rclpy.node            import Node
 from rcl_interfaces.msg    import ParameterType
 from ddynamic_reconfigure2 import DDynamicReconfigure
@@ -110,13 +110,11 @@ class TestNode(Node):
                                        self._enum_param_d, self._enum_param_s))
 
 
-def main(args):
-    rclpy.init(args=args)
+def main():
+    rclpy.init(args=sys.argv)
 
     node = TestNode('pytestnode')
     rclpy.spin(node)
-    node.destroy_node()
-    rclpy.shutdown()
 
 if __name__ == '__main__':
-    main(None)
+    main()

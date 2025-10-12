@@ -55,14 +55,14 @@ class DDynamicReconfigure(object):
     def register_variable(self, param_name, current_value, cb, description='',
                           min_value=None, max_value=None, step=0):
         self._register_parameter(DDynamicReconfigure.create_desc(
-                                     param_name, current_value, description,
-                                     min_value, max_value, step),
+                                     param_name, current_value, False,
+                                     description, min_value, max_value, step),
                                  current_value, cb)
 
     def register_enum_variable(self, param_name, current_value, cb,
                                description, enum_dict, enum_description=''):
         desc = DDynamicReconfigure.create_desc(param_name, current_value,
-                                               description,
+                                               False, description,
                                                min(enum_dict.values()),
                                                max(enum_dict.values()))
         desc.additional_constraints \
