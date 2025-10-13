@@ -85,13 +85,13 @@ ROS2のパラメータには，ROS1に比べて以下のような違いがあり
 ### パラメータ管理機能のセットアップ
 開発するノードに[class DDynamicReconfigure\<NODE\>](./include/ddynamic_reconfigure2/ddynamic_reconfigure2.hpp#L192-L193)型のメンバ変数を持たせることにより，パラメータやそのレンジを設定する準備が整います．
 ```c++
-#include <ddynamic_reconfigure2/ddynamic_reconfigure2.hpp>                      
+#include <ddynamic_reconfigure2/ddynamic_reconfigure2.hpp>
 
 class TestNode : public rclcpp::Node
 {
   public:
     TestNode(const rclcpp::NodeOptions& options=rclcpp::NodeOptions())  ;
-    ... 
+    ...
 
   private:
     DDynamicReconfigure<> _ddr;
@@ -100,15 +100,15 @@ class TestNode : public rclcpp::Node
     ...
 };
 
-TestNode::TestNode(const rclcpp::NodeOptions& options)                          
-    :rclcpp::Node("testnode", options),                                         
-     _ddr(rclcpp::Node::SharedPtr(this)),                                       
+TestNode::TestNode(const rclcpp::NodeOptions& options)
+    :rclcpp::Node("testnode", options),
+     _ddr(rclcpp::Node::SharedPtr(this)),
      _param_i64(4),
      _param_d(0.5),
-     ...          
+     ...
 {
     ...
-}   
+}
 ```
 
 ### パラメータをC++変数に直接結びつける
@@ -171,14 +171,14 @@ from ddynamic_reconfigure2.server import DDynamicReconfigure
 class TestNode(Node):
     def __init__(self, node_name):
         super().__init__(node_name)
-        
+
         self._param_i64 = 4
         self._param_d   = 0.5
         ...
         self._ddr = DDynamicReconfigure(self)
 ```
 ### パラメータをPythonのコールバック関数に結びつける
-[DDynamicReconfigure.register_variable(self, param_name, current_value, cb, description='', min_value=None, max_value=None, step=0)](./ddynamic_reconfigure2/server.py#l54-#L55)を使うと，パラメータをPythonのコールバック関数に結びつけることができます．
+[DDynamicReconfigure.register_variable(self, param_name, current_value, cb, description='', min_value=None, max_value=None, step=0)](./ddynamic_reconfigure2/server.py#L54-#L55)を使うと，パラメータをPythonのコールバック関数に結びつけることができます．
 - **name**: パラメータ名．階層化する場合の区切り文字は`.`
 - **current_value**: パラメータの初期値．取り得る型は`bool`, `int`, `float`, `str`もしくはそれらを要素とするシーケンス型である．ノード起動時のパラメータconfigurationファイルでこのパラメータの値が指定されていない場合に有効
 - **cb**: パラメータ変更時に呼ばれるコールバック関数．外部から与えられたパラメータ更新値が引数として渡される．lambda関数も可
@@ -198,7 +198,7 @@ class TestNode(Node):
 上記のようにlambda関数を用いれば簡単にPython変数を操作できるので，C++版のようなパラメータを直接変数に結びつけるAPIはありません．
 
 ### パラメータが取り得る値を有限個の候補値に限定する
-[DDynamicReconfigure.register_enum_variable(self, param_name, current_value, cb, description, enum_dict, enum_description='')](./ddynamic_reconfigure2/server.py#l61-#L62)を使うと，パラメータをPythonのコールバック関数に結びつけるとともに，その値を`enum_dict`に与えた有限個の候補値に限定することができます．
+[DDynamicReconfigure.register_enum_variable(self, param_name, current_value, cb, description, enum_dict, enum_description='')](./ddynamic_reconfigure2/server.py#L61-#L62)を使うと，パラメータをPythonのコールバック関数に結びつけるとともに，その値を`enum_dict`に与えた有限個の候補値に限定することができます．
 - **name**: パラメータ名．階層化する場合の区切り文字は`.`
 - **current_value**: パラメータの初期値．取り得る型は`bool`, `int`, `float`, `str`もしくはそれらを要素とするシーケンス型である．ノード起動時のパラメータconfigurationファイルでこのパラメータの値が指定されていない場合に有効
 - **cb**: パラメータ変更時に呼ばれるコールバック関数．外部から与えられたパラメータ更新値が引数として渡される．lambda関数も可
@@ -215,4 +215,6 @@ class TestNode(Node):
                                      {'low': 1.0, 'middle': 2.1, 'high': 3.2},
                                      'low/middle/high')
 ```
-とすれば，パラメータ`numeric.enum_param_d`が定義され，その値を外部から変更するとそれがlambda関数に渡されてクラス`TestNode`のメンバ変数`self._enum_param_d`に代入されます．このとき，取り得る値は`1.0`, `2.1`, `3.2`のいずれかに限定されます．
+とすれば，パラメータ`numeric.enum_param_d`が定義され，その値を外部から変更するとそれがlambda関数に渡されてクラス`TestNode`のメンバ変数`self._enum_param_d`に代入されます．このとき，取り得る値は`1.0`, `2.1`, `3.2`のいずれかに限定されます
+
+上記のようにlambda関数を用いれば簡単にPython変数を操作できるので，C++版のようなパラメータを直接変数に結びつけるAPIはありません．
