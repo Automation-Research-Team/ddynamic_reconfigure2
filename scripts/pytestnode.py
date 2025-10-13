@@ -36,7 +36,6 @@
 #
 import rclpy, sys
 from rclpy.node            import Node
-from rcl_interfaces.msg    import ParameterType
 from ddynamic_reconfigure2 import DDynamicReconfigure
 
 #########################################################################
@@ -102,7 +101,7 @@ class TestNode(Node):
         self._timer = self.create_timer(1.0, self._timer_cb)
 
     def _timer_cb(self):
-        self.get_logger().info('param_b[{0}] param_i64[{1}] param_d[{2}] param_s[{3}] params_b[{4}] params_i64[{5}] params_d[{6}] params_s[{7}] enum_param_d[{8}] enum_param_s[{9}]'
+        self.get_logger().info('\nparam_b: {0}\nparam_i64: {1}\nparam_d: {2}\nparam_s: {3}\nparams_b: {4}\nparams_i64: {5}\nparams_d: {6}\nparams_s: {7}\nenum_param_d: {8}\nenum_param_s: {9}\n'
                                .format(self._param_b, self._param_i64,
                                        self._param_d, self._param_s,
                                        self._params_b, self._params_i64,

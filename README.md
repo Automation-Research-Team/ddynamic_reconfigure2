@@ -62,7 +62,7 @@ $ ros2 launch ddynamic_reconfigure2 test.launch.py
 - **numeric.enum_param_d**: 有限個の候補から値を選ぶ浮動小数点数型パラメータ, `numeric`グループに所属
 - **string.enum_param_s**: 有限個の候補から値を選ぶ文字列型パラメータ，`string`グループに所属
 
-`rqt_reconfigure`からこれらの値を変更すると，表示もそれに合わせて変化することがわかるでしょう．
+`rqt_reconfigure`からこれらの値を変更すると，表示もそれに合わせて変化することがわかるでしょう．また，これらの値の初期値は，[パラメータ設定用YAMLファイル](./config/test.yaml)で指定されています．
 
 ### Python版（Jazzy以降）
 以下によってC++版と同様の[テストプログラム](./scripts/pytestnode.py)を起動できます．
@@ -110,24 +110,26 @@ TestNode::TestNode(const rclcpp::NodeOptions& options)
 }   
 ```
 
-ある変数をノードパラメータに結びつけ，その値を外部から変更可能にするためには，[template \<class T\> DDynamicReconfigure<NODE>::registerVariable(const std::string& name, T* variable, const std::string& description, const param_range<T>& range)](./include/ddynamic_reconfigure2/ddynamic_reconfigure2.hpp#L243-#L253)を使います．
-- **name**: パラメータ名
-- **variable**: パラメータの値を保持する変数へのポインタ．ノード起動時のパラメータconfigurationファイルで指定されていなければ，呼び出し時におけるこの変数の値がパラメータの初期値となる．
+ある変数をノードパラメータに結びつけ，その値を外部から変更可能にするためには，[template \<class T\> DDynamicReconfigure<NODE>::registerVariable(const std::string& name, T* variable, const std::string& description, const param_range\<T\>& range)](./include/ddynamic_reconfigure2/ddynamic_reconfigure2.hpp#L243-#L253)を使います．
+- **name**: パラメータ名．グループ化する場合の区切り文字は`.`
+- **variable**: パラメータの値を保持する変数へのポインタ．Tが取り得る型は[std::is_arithmetic\<T\>.value ](https://cpprefjp.github.io/reference/type_traits/is_arithmetic.html)が`true`となる型，`std::string`型もしくはそれらを要素とする`std::vector`型である．ノード起動時のパラメータconfigurationファイルでこのパラメータの値が指定されていなければ，呼び出し時におけるこの変数の値がパラメータの初期値となる
 - **description**: パラメータの説明を与える任意のテキスト
-- **range**: パラメータのレンジ
+- **range**: パラメータのレンジを最小値，最大値，刻み幅の3つ組で指定する．刻み幅を省略するとその値は0となり，これは最大値と最小値の間で任意の値をとれることを意味する
 
 例えば，`int64_t`型の変数`_param_i64`を`numeric.param_i64`という名前のパラメータとして定義し，そのレンジを-4以上10以下で刻み幅2とするには，
 ```c++
 {
+    ...
     _ddr.registerVariable("numeric.param_i64", &_param_i64,
 			              "parameter of int64_t type", {-4, 10, 2});
+    ...
 }
 ```
-とします．これで，変数`_param_i64`の値を`rqt_reconfigure`を用いて外部から操作できます．刻み幅を省略するとその値は0となり，これは最大値と最小値の間で任意の値をとれることを意味します．テンプレートパラメータ`T`は，
+とします．これで，変数`_param_i64`の値を`rqt_reconfigure`を用いて外部から操作できます．
 
 パラメータを，C++の変数ではなく，C++の関数に結びつけてノードの状態を変更したいこともあるでしょう．その場合は，[template \<class T\> DDynamicReconfigure\<NODE\>::registerVariable(const std::string& name, const T& current_value, const std::function<void(const T&)>& cb, const std::string& description, const param_range\<T\>& range)](./include/ddynamic_reconfigure2/ddynamic_reconfigure2.hpp#L255-#L270)を使います．
-- **name**: パラメータ名
-- **current_value**: ノード起動時のパラメータconfigurationファイルで指定されていない場合に設定されるパラメータの初期値
+- **name**: パラメータ名．グループ化する場合の区切り文字は`.`
+- **current_value**: パラメータの初期値．Tが取り得る型は[std::is_arithmetic\<T\>.value ](https://cpprefjp.github.io/reference/type_traits/is_arithmetic.html)が`true`となる型，`std::string`型もしくはそれらを要素とする`std::vector`型である．ノード起動時のパラメータconfigurationファイルでこのパラメータの値が指定されていない場合に有効
 - **cb**: パラメータ変更時に呼ばれるコールバック関数
 - **description**: パラメータの説明を与える任意のテキスト
 - **range**: パラメータのレンジ

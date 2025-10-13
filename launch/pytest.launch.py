@@ -1,5 +1,8 @@
-from launch             import LaunchDescription
-from launch_ros.actions import Node
+from launch                            import LaunchDescription
+from launch.substitutions              import (ThisLaunchFileDir,
+                                               PathJoinSubstitution)
+from launch_ros.actions                import Node
+from launch_ros.parameter_descriptions import ParameterFile
 
 def generate_launch_description():
     return LaunchDescription(
@@ -7,6 +10,10 @@ def generate_launch_description():
               package='ddynamic_reconfigure2',
               executable='pytestnode.py',
               output='screen',
-              parameters=[{'numeric.param_i64': -2, 'numeric.param_d': 1.6}]),
+              parameters=[
+                  ParameterFile(
+                      PathJoinSubstitution([ThisLaunchFileDir(),
+                                            '..', 'config', 'test.yaml']))
+              ]),
          Node(name='rqt_reconfigure', package='rqt_reconfigure',
               executable='rqt_reconfigure', output='screen')])

@@ -107,17 +107,17 @@ TestNode::TestNode(const rclcpp::NodeOptions& options)
 void
 TestNode::timer_cb()
 {
-    RCLCPP_INFO_STREAM(get_logger(), "param_b[" << _param_b
-		       << "] param_i64[" << _param_i64
-		       << "] param_d[" << _param_d
-		       << "] param_s[" << _param_s
-		       << "] params_b[" << _params_b
-		       << "] params_i64[" << _params_i64
-		       << "] params_d[" << _params_d
-		       << "] params_s[" << _params_s
-		       << "] enum_param_d[" << _enum_param_d
-		       << "] enum_param_s[" << _enum_param_s
-		       << ']');
+    RCLCPP_INFO_STREAM(get_logger(),
+		       "\nparam_b: " << std::boolalpha << _param_b
+		       << "\nparam_i64: " << _param_i64
+		       << "\nparam_d: " << _param_d
+		       << "\nparam_s: " << _param_s
+		       << "\nparams_b: " << _params_b
+		       << "\nparams_i64: " << _params_i64
+		       << "\nparams_d: " << _params_d
+		       << "\nparams_s: " << _params_s
+		       << "\nenum_param_d: " << _enum_param_d
+		       << "\nenum_param_s: " << _enum_param_s << '\n');
 }
 }	// ddynamic_reconfigure2
 
