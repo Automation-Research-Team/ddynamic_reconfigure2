@@ -87,6 +87,8 @@ ROS2のパラメータには，ROS1に比べて以下のような違いがあり
 ```c++
 #include <ddynamic_reconfigure2/ddynamic_reconfigure2.hpp>
 
+namespace ddynamic_reconfigure2
+{
 class TestNode : public rclcpp::Node
 {
   public:
@@ -94,9 +96,10 @@ class TestNode : public rclcpp::Node
     ...
 
   private:
-    DDynamicReconfigure<> _ddr;
-    int64_t				  _param_i64;
-    double                _param_d;
+    DDynamicReconfigure<>       _ddr;
+    int64_t				        _param_i64;
+    double                      _param_d;
+    std::vector<std::string>    _params_s;
     ...
 };
 
@@ -105,9 +108,11 @@ TestNode::TestNode(const rclcpp::NodeOptions& options)
      _ddr(rclcpp::Node::SharedPtr(this)),
      _param_i64(4),
      _param_d(0.5),
+     _params_s({"s0", "s1"})
      ...
 {
     ...
+}
 }
 ```
 
