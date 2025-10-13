@@ -75,12 +75,12 @@ ROS2のパラメータには，ROS1に比べて以下のような違いがあり
 - パラメータは，必ずノード内で宣言してから使わなければならない．
 - パラメータの型は，[9種類に限定されている](https://docs.ros2.org/latest/api/rcl_interfaces/msg/ParameterType.html)．
 - パラメータ名を階層化する場合の区切り文字は，`/`ではなく`.`である．
-- パラメータの初期値は，宣言時もしくはノード起動時に与えたYAML形式のconfigurationファイルによって指定される．両方を指定した場合は，後者が優先される．
+- パラメータの初期値は，宣言時に指定するか，もしくはノード起動時に与えたYAML形式のconfigurationファイルによって指定する．両方を指定すると，後者が優先される．
 - パラメータには，その型ばかりでなく，取り得る値の範囲（レンジ）や候補値（列挙型），外部からの変更の可否などの[属性](https://docs.ros2.org/latest/api/rcl_interfaces/msg/ParameterDescriptor.html)が付与され，値の変更時にその条件が満たされているかチェックされる．
 
 パラメータの型が`bool`，整数，浮動小数点，文字列およびそれらの配列に限定されているので，ROS1のように，異なる型が混在したリストや文字列をキーとした辞書を1つのパラメータとして扱うことはできません．例えば，`numeric.param_i64`と`numeric.param_d`というそれぞれ整数型と浮動小数点型の2つのパラメータを定義した場合，これらは`numeric`というグループに所属しますが，`numeric`そのものを`param_i64`と`param_d`という2つのキーを持つ辞書型のパラメータとして扱うことはできません．パラメータを使うノードを開発する際には，これらの点に留意する必要があります．
 
-以下では[テストプログラム](./src/testnode.cpp)を例題としてC++ APIの使い方を説明します．
+以下では，[テストプログラム](./src/testnode.cpp)を例題としてC++ APIの使い方を説明します．
 
 ### パラメータ管理機能のセットアップ
 開発するノードに[class DDynamicReconfigure\<NODE\>](./include/ddynamic_reconfigure2/ddynamic_reconfigure2.hpp#L192-L193)型のメンバ変数を持たせることにより，パラメータやそのレンジを設定する準備が整います．
@@ -161,7 +161,8 @@ TestNode::TestNode(const rclcpp::NodeOptions& options)
 [template <class T> void DDynamicReconfigure<NODE>::registerEnumVariable(const std::string& name, const T& current_value, const std::function<void(const T&)>& cb, const std::string& description, const std::map<std::string, T>& enum_dict, const std::string& enum_description)](./include/ddynamic_reconfigure2/ddynamic_reconfigure2.hpp#L290-#L321)を使えば，パラメータを変数ではなくコールバック関数に結びつけた上で，その取り得る値を有限個に限定することもできます．
 
 ## Python APIの使い方
-以下では[テストプログラム](./scripts/pytestnode.py)を例題としてPython APIの使い方を説明します．
+以下では，[テストプログラム](./scripts/pytestnode.py)を例題としてPython APIの使い方を説明します．
+
 ### パラメータ管理機能のセットアップ
 開発するノードに[class DDynamicReconfigure](./ddynamic_reconfigure2/server.py#L46)型のメンバ変数を持たせることにより，パラメータやそのレンジを設定する準備が整います．
 ```python
