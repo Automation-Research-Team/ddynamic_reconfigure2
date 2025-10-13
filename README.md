@@ -178,8 +178,8 @@ class TestNode(Node):
     def __init__(self, node_name):
         super().__init__(node_name)
 
-        self._param_i64 = 4
-        self._param_d   = 0.5
+        self._param_i64    = 4
+        self._enum_param_d = 2.1
         ...
         self._ddr = DDynamicReconfigure(self)
 ```
@@ -221,6 +221,6 @@ class TestNode(Node):
                                      {'low': 1.0, 'middle': 2.1, 'high': 3.2},
                                      'low/middle/high')
 ```
-とすれば，パラメータ`numeric.enum_param_d`が定義され，その値を外部から変更するとそれがlambda関数に渡されてクラス`TestNode`のメンバ変数`self._enum_param_d`に代入されます．このとき，取り得る値は`1.0`, `2.1`, `3.2`のいずれかに限定されます
+とすれば，パラメータ`numeric.enum_param_d`が定義され，その値を外部から変更するとそれがlambda関数に渡されてクラス`TestNode`のメンバ変数`self._enum_param_d`に代入されます．このとき，取り得る値は`1.0`, `2.1`, `3.2`のいずれかに限定されます．
 
 上記のようにlambda関数を用いれば簡単にPython変数を操作できるので，C++版のようなパラメータを直接変数に結びつけるAPIはありません．
