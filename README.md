@@ -70,7 +70,7 @@ $ ros2 launch ddynamic_reconfigure2 test.launch.py
 $ ros2 launch ddynamic_reconfigure2 pytest.launch.py
 ```
 
-## APIの使い方
+## C++ APIの使い方
 ROS2のパラメータには，ROS1に比べて以下のような違いがあります．
 - パラメータは，必ずノード内で宣言してから使わなければならない．
 - パラメータの型は，[9種類に限定されている](https://docs.ros2.org/latest/api/rcl_interfaces/msg/ParameterType.html)．
@@ -78,14 +78,12 @@ ROS2のパラメータには，ROS1に比べて以下のような違いがあり
 - パラメータの初期値は，宣言時もしくはノード起動時に与えたYAML形式のconfigurationファイルによって指定される．両方を指定した場合は，後者が優先される．
 - パラメータには，その型ばかりでなく，取り得る値の範囲（レンジ）や候補値（列挙型），外部からの変更の可否などの[属性](https://docs.ros2.org/latest/api/rcl_interfaces/msg/ParameterDescriptor.html)が付与され，値の変更時にその条件が満たされているかチェックされる．
 
-パラメータの型がbool，整数，浮動小数点，文字列およびそれらの配列に限定されているので，ROS1のように，異なる型が混在したリストや文字列をキーとした辞書を1つのパラメータとして扱うことはできません．例えば，`numeric.param_i64`と`numeric.param_d`というそれぞれ整数型と浮動小数点型の2つのパラメータを定義した場合，これらは`numeric`というグループに所属しますが，`numeric`そのものを`param_i64`と`param_d`という2つのキーを持つ辞書型のパラメータとして扱うことはできません．
+パラメータの型が`bool`，整数，浮動小数点，文字列およびそれらの配列に限定されているので，ROS1のように，異なる型が混在したリストや文字列をキーとした辞書を1つのパラメータとして扱うことはできません．例えば，`numeric.param_i64`と`numeric.param_d`というそれぞれ整数型と浮動小数点型の2つのパラメータを定義した場合，これらは`numeric`というグループに所属しますが，`numeric`そのものを`param_i64`と`param_d`という2つのキーを持つ辞書型のパラメータとして扱うことはできません．パラメータを使うノードを開発する際には，これらの点に留意する必要があります．
 
-パラメータを使うノードを開発する場合は，これらの点に留意する必要があります．
+以下では[テストプログラム](./src/testnode.cpp)を例題としてC++ APIの使い方を説明します．
 
-### C++
-使い方の例は，[テストプログラム](./src/testnode.cpp)を参照してください．
-
-開発するノードに[class DDynamicReconfigure2\<NODE\>](./include/ddynamic_reconfigure2/ddynamic_reconfigure2.hpp)型のメンバ変数を持たせることにより，パラメータやそのレンジを設定できるようになります．
+### パラメータ管理機能のセットアップ
+開発するノードに[class DDynamicReconfigure\<NODE\>](./include/ddynamic_reconfigure2/ddynamic_reconfigure2.hpp#L192-L193)型のメンバ変数を持たせることにより，パラメータやそのレンジを設定する準備が整います．
 ```c++
 #include <ddynamic_reconfigure2/ddynamic_reconfigure2.hpp>                      
 
@@ -98,38 +96,123 @@ class TestNode : public rclcpp::Node
   private:
     DDynamicReconfigure<> _ddr;
     int64_t				  _param_i64;
+    double                _param_d;
+    ...
 };
 
 TestNode::TestNode(const rclcpp::NodeOptions& options)                          
     :rclcpp::Node("testnode", options),                                         
      _ddr(rclcpp::Node::SharedPtr(this)),                                       
      _param_i64(4),
+     _param_d(0.5),
      ...          
 {
     ...
 }   
 ```
 
-ある変数をノードパラメータに結びつけ，その値を外部から変更可能にするためには，[template \<class T\> DDynamicReconfigure<NODE>::registerVariable(const std::string& name, T* variable, const std::string& description, const param_range\<T\>& range)](./include/ddynamic_reconfigure2/ddynamic_reconfigure2.hpp#L243-#L253)を使います．
-- **name**: パラメータ名．グループ化する場合の区切り文字は`.`
-- **variable**: パラメータの値を保持する変数へのポインタ．Tが取り得る型は[std::is_arithmetic\<T\>.value ](https://cpprefjp.github.io/reference/type_traits/is_arithmetic.html)が`true`となる型，`std::string`型もしくはそれらを要素とする`std::vector`型である．ノード起動時のパラメータconfigurationファイルでこのパラメータの値が指定されていなければ，呼び出し時におけるこの変数の値がパラメータの初期値となる
+### パラメータをC++変数に直接結びつける
+ノードパラメータをあるC++変数に結びつけてその値を外部から変更可能にするには，[template \<class T\> DDynamicReconfigure<NODE>::registerVariable(const std::string& name, T* variable, const std::string& description, const param_range\<T\>& range)](./include/ddynamic_reconfigure2/ddynamic_reconfigure2.hpp#L243-#L253)を呼びます．
+- **name**: パラメータ名．階層化する場合の区切り文字は`.`
+- **variable**: パラメータの値を保持する変数へのポインタ．テンプレートパラメータ`T`が取り得る型は[std::is_arithmetic\<T\>.value ](https://cpprefjp.github.io/reference/type_traits/is_arithmetic.html)が`true`となる型，`std::string`型もしくはそれらを要素とする`std::vector`型である．ノード起動時のパラメータconfigurationファイルでこのパラメータの値が指定されていなければ，呼び出し時におけるこの変数の値がパラメータの初期値となる
 - **description**: パラメータの説明を与える任意のテキスト
-- **range**: パラメータのレンジを最小値，最大値，刻み幅の3つ組で指定する．刻み幅を省略するとその値は0となり，これは最大値と最小値の間で任意の値をとれることを意味する
+- **range**: パラメータのレンジを最小値，最大値，刻み幅の3つ組で指定する．刻み幅を省略するとその値は0となり，これは最大値と最小値の間で任意の値をとれることを意味する．テンプレートパラメータ`T`が`bool`, `std::string`, `std::vector`の場合は無効
 
 例えば，`int64_t`型の変数`_param_i64`を`numeric.param_i64`という名前のパラメータとして定義し，そのレンジを-4以上10以下で刻み幅2とするには，
 ```c++
-{
-    ...
     _ddr.registerVariable("numeric.param_i64", &_param_i64,
 			              "parameter of int64_t type", {-4, 10, 2});
-    ...
-}
 ```
 とします．これで，変数`_param_i64`の値を`rqt_reconfigure`を用いて外部から操作できます．
 
+### パラメータをC++のコールバック関数に結びつける
 パラメータを，C++の変数ではなく，C++の関数に結びつけてノードの状態を変更したいこともあるでしょう．その場合は，[template \<class T\> DDynamicReconfigure\<NODE\>::registerVariable(const std::string& name, const T& current_value, const std::function<void(const T&)>& cb, const std::string& description, const param_range\<T\>& range)](./include/ddynamic_reconfigure2/ddynamic_reconfigure2.hpp#L255-#L270)を使います．
-- **name**: パラメータ名．グループ化する場合の区切り文字は`.`
+- **name**: パラメータ名．階層化する場合の区切り文字は`.`
 - **current_value**: パラメータの初期値．Tが取り得る型は[std::is_arithmetic\<T\>.value ](https://cpprefjp.github.io/reference/type_traits/is_arithmetic.html)が`true`となる型，`std::string`型もしくはそれらを要素とする`std::vector`型である．ノード起動時のパラメータconfigurationファイルでこのパラメータの値が指定されていない場合に有効
-- **cb**: パラメータ変更時に呼ばれるコールバック関数
+- **cb**: パラメータ変更時に呼ばれるコールバック関数．外部から与えられたパラメータ更新値が引数として渡される．lambda関数も可
 - **description**: パラメータの説明を与える任意のテキスト
-- **range**: パラメータのレンジ
+- **range**: パラメータのレンジを最小値，最大値，刻み幅の3つ組で指定する．刻み幅を省略するとその値は0となり，これは最大値と最小値の間で任意の値をとれることを意味する．テンプレートパラメータ`T`が`bool`, `std::string`, `std::vector`の場合は無効
+
+例えば，
+```c++
+    _ddr.registerVariable("numeric.param_d", _param_d,
+			              [this](const double& x){ this->_param_d = x; },
+			              "parameter of double type", {-1.0, 2.0});
+```
+とすると，パラメータ`numeric.param_d`の値を外部から変更すると，それがここで指定したlambda関数に渡されて変数`_param_d`に代入されます．つまり`numeric.param_i64`の例と同じ動作ですが，コールバック内でもっと複雑な処理を実行することも可能です．
+
+### パラメータが取り得る値を有限個の候補値に限定する
+[template <class T> void DDynamicReconfigure<NODE>::registerEnumVariable(const std::string& name, T* variable, const std::string& description, const std::map<std::string, T>& enum_dict, const std::string& enum_description)](./include/ddynamic_reconfigure2/ddynamic_reconfigure2.hpp#L278-#L288)を使うと，パラメータをあるC++変数に結びつけるとともに，その値を`enum_dict`に与えた有限個の候補値に限定することができます．
+- **name**: パラメータ名．階層化する場合の区切り文字は`.`
+- **variable**: パラメータの値を保持する変数へのポインタ．Tが取り得る型は[std::is_arithmetic\<T\>.value ](https://cpprefjp.github.io/reference/type_traits/is_arithmetic.html)が`true`となる型，`std::string`型もしくはそれらを要素とする`std::vector`型である．ノード起動時のパラメータconfigurationファイルでこのパラメータの値が指定されていない場合に有効
+- **description**: パラメータの説明を与える任意のテキスト
+- **enum_dict**: 候補値の名前をkeyとし値をvalueとする辞書
+- **enum_description**: 各候補値の説明を与える任意のテキスト
+
+例えば．
+```c++
+    _ddr.registerEnumVariable("string.enum_param_s", &_enum_param_s,
+	            		      "enum parameter of string type",
+	            		      {{"one", "One"}, {"two", "Two"}, {"three", "Three"}},
+	            		      "one/two/three");
+```
+とすれば，パラメータ`string.enum_param_s`を変数`_enum_param_s`に結びつけ，その値を`One`, `Two`, `Three`のいずれかに限定できます．
+
+[template <class T> void DDynamicReconfigure<NODE>::registerEnumVariable(const std::string& name, const T& current_value, const std::function<void(const T&)>& cb, const std::string& description, const std::map<std::string, T>& enum_dict, const std::string& enum_description)](./include/ddynamic_reconfigure2/ddynamic_reconfigure2.hpp#L290-#L321)を使えば，パラメータを変数ではなくコールバック関数に結びつけた上で，その取り得る値を有限個に限定することもできます．
+
+## Python APIの使い方
+以下では[テストプログラム](./scripts/pytestnode.py)を例題としてPython APIの使い方を説明します．
+### パラメータ管理機能のセットアップ
+開発するノードに[class DDynamicReconfigure](./ddynamic_reconfigure2/server.py#L46)型のメンバ変数を持たせることにより，パラメータやそのレンジを設定する準備が整います．
+```python
+from rclpy.node                   import Node
+from ddynamic_reconfigure2.server import DDynamicReconfigure
+
+class TestNode(Node):
+    def __init__(self, node_name):
+        super().__init__(node_name)
+        
+        self._param_i64 = 4
+        self._param_d   = 0.5
+        ...
+        self._ddr = DDynamicReconfigure(self)
+```
+### パラメータをPythonのコールバック関数に結びつける
+[DDynamicReconfigure.register_variable(self, param_name, current_value, cb, description='', min_value=None, max_value=None, step=0)](./ddynamic_reconfigure2/server.py#l54-#L55)を使うと，パラメータをPythonのコールバック関数に結びつけることができます．
+- **name**: パラメータ名．階層化する場合の区切り文字は`.`
+- **current_value**: パラメータの初期値．取り得る型は`bool`, `int`, `float`, `str`もしくはそれらを要素とするシーケンス型である．ノード起動時のパラメータconfigurationファイルでこのパラメータの値が指定されていない場合に有効
+- **cb**: パラメータ変更時に呼ばれるコールバック関数．外部から与えられたパラメータ更新値が引数として渡される．lambda関数も可
+- **description**: パラメータの説明を与える任意のテキスト
+- **min_value**: パラメータの最小値．`current_value`の型が`int`, `float`の場合のみ有効
+- **max_value**: パラメータの最大値．`current_value`の型が`int`, `float`の場合のみ有効
+- **step**: パラメータの刻み幅．省略するとその値は0となり，これは最大値と最小値の間で任意の値をとれることを意味する．`current_value`の型が`int`, `float`の場合のみ有効
+
+例えば，
+```python
+    self._ddr.register_variable('numeric.param_i64', self._param_i64,
+                                lambda x: setattr(self, '_param_i64', x),
+                                'parameter of int64_t type', -4, 10, 2)
+```
+とすれば，パラメータ`numeric.param_i64`が定義され，その値を外部から変更するとそれがlambda関数に渡されてクラス`TestNode`のメンバ変数`self._param_i64`に代入されます．
+
+上記のようにlambda関数を用いれば簡単にPython変数を操作できるので，C++版のようなパラメータを直接変数に結びつけるAPIはありません．
+
+### パラメータが取り得る値を有限個の候補値に限定する
+[DDynamicReconfigure.register_enum_variable(self, param_name, current_value, cb, description, enum_dict, enum_description='')](./ddynamic_reconfigure2/server.py#l61-#L62)を使うと，パラメータをPythonのコールバック関数に結びつけるとともに，その値を`enum_dict`に与えた有限個の候補値に限定することができます．
+- **name**: パラメータ名．階層化する場合の区切り文字は`.`
+- **current_value**: パラメータの初期値．取り得る型は`bool`, `int`, `float`, `str`もしくはそれらを要素とするシーケンス型である．ノード起動時のパラメータconfigurationファイルでこのパラメータの値が指定されていない場合に有効
+- **cb**: パラメータ変更時に呼ばれるコールバック関数．外部から与えられたパラメータ更新値が引数として渡される．lambda関数も可
+- **description**: パラメータの説明を与える任意のテキスト
+- **enum_dict**: 候補値の名前をkeyとし値をvalueとする辞書
+- **enum_description**: 各候補値の説明を与える任意のテキスト
+
+例えば，
+```python
+    self._ddr.register_enum_variable('numeric.enum_param_d',
+                                     self._enum_param_d,
+                                     lambda x: setattr(self, '_enum_param_d', x),
+                                     'enum parameter of double type',
+                                     {'low': 1.0, 'middle': 2.1, 'high': 3.2},
+                                     'low/middle/high')
+```
+とすれば，パラメータ`numeric.enum_param_d`が定義され，その値を外部から変更するとそれがlambda関数に渡されてクラス`TestNode`のメンバ変数`self._enum_param_d`に代入されます．このとき，取り得る値は`1.0`, `2.1`, `3.2`のいずれかに限定されます．
