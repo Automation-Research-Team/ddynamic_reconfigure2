@@ -96,10 +96,10 @@ class TestNode : public rclcpp::Node
     ...
 
   private:
-    DDynamicReconfigure<>       _ddr;
-    int64_t				        _param_i64;
-    double                      _param_d;
-    std::vector<std::string>    _params_s;
+    DDynamicReconfigure<>   _ddr;
+    int64_t				    _param_i64;
+    double                  _param_d;
+    std::string				_enum_param_s;
     ...
 };
 
@@ -108,7 +108,7 @@ TestNode::TestNode(const rclcpp::NodeOptions& options)
      _ddr(rclcpp::Node::SharedPtr(this)),
      _param_i64(4),
      _param_d(0.5),
-     _params_s({"s0", "s1"})
+     _enum_param_s("Two")
      ...
 {
     ...
