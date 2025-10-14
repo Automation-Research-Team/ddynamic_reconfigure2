@@ -140,9 +140,9 @@ TestNode::TestNode(const rclcpp::NodeOptions& options)
 
 例えば，
 ```c++
-    _ddr.registerVariable("numeric.param_d", _param_d,
-			              [this](const double& x){ this->_param_d = x; },
-			              "parameter of double type", {-1.0, 2.0});
+    _ddr.registerVariable<double>("numeric.param_d", _param_d,
+			                      [this](const double& x){ this->_param_d = x; },
+			                      "parameter of double type", {-1.0, 2.0});
 ```
 とすると，パラメータ`numeric.param_d`の値を外部から変更すると，それがここで指定したlambda関数に渡されて変数`_param_d`に代入されます．つまり`numeric.param_i64`の例と同じ動作ですが，コールバック内でもっと複雑な処理を実行することも可能です．
 
