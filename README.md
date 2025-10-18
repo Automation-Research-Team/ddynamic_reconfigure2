@@ -83,7 +83,7 @@ ROS2のパラメータには，ROS1に比べて以下のような違いがあり
 以下では，[テストプログラム](./src/testnode.cpp)を例題としてC++ APIの使い方を説明します．
 
 ### パラメータ管理機能のセットアップ
-開発するノードに[class DDynamicReconfigure\<NODE\>](./include/ddynamic_reconfigure2/ddynamic_reconfigure2.hpp#L192-L193)型のメンバ変数を持たせることにより，パラメータやそのレンジを設定する準備が整います．
+開発するノードに[class DDynamicReconfigure\<NODE\>](./include/ddynamic_reconfigure2/ddynamic_reconfigure2.hpp#L192-L193)型のメンバ変数を持たせることにより，パラメータやそのレンジを設定する準備が整います．テンプレートパラメータ`NODE`には，ノードの種類に応じて[rclcpp::Node](https://docs.ros2.org/latest/api/rclcpp/classrclcpp_1_1Node.html)（省略可）または[rclcpp_lifecycle::LifecycleNode](https://docs.ros2.org/latest/api/rclcpp_lifecycle/classrclcpp__lifecycle_1_1LifecycleNode.html)を指定します．
 ```c++
 #include <ddynamic_reconfigure2/ddynamic_reconfigure2.hpp>
 
@@ -116,8 +116,16 @@ TestNode::TestNode(const rclcpp::NodeOptions& options)
 }
 ```
 
+
 ### パラメータをC++変数に直接結びつける
-ノードパラメータをあるC++変数に結びつけてその値を外部から変更可能にするには，[template \<class T\> DDynamicReconfigure<NODE>::registerVariable(const std::string& name, T* variable, const std::string& description, const param_range\<T\>& range)](./include/ddynamic_reconfigure2/ddynamic_reconfigure2.hpp#L243-#L253)を呼びます．
+ノードパラメータをあるC++変数に結びつけてその値を外部から変更可能にするには，[次の関数](./include/ddynamic_reconfigure2/ddynamic_reconfigure2.hpp#L206-#L209)を呼びます．
+```c++
+template <class NODE> template <class T> void
+DDynamicReconfigure<NODE>::registerVariable(const std::string& name,
+                                            T* variable,
+                                            const std::string& description="",
+                                            const param_range<T>& range={});
+```
 - **name**: パラメータ名．階層化する場合の区切り文字は`.`
 - **variable**: パラメータの値を保持する変数へのポインタ．テンプレートパラメータ`T`が取り得る型は[std::is_arithmetic\<T\>.value ](https://cpprefjp.github.io/reference/type_traits/is_arithmetic.html)が`true`となる型，`std::string`型もしくはそれらを要素とする`std::vector`型である．ノード起動時のパラメータconfigurationファイルでこのパラメータの値が指定されていなければ，呼び出し時におけるこの変数の値がパラメータの初期値となる
 - **description**: パラメータの説明を与える任意のテキスト
@@ -131,7 +139,16 @@ TestNode::TestNode(const rclcpp::NodeOptions& options)
 とします．これで，変数`_param_i64`の値を`rqt_reconfigure`を用いて外部から操作できます．
 
 ### パラメータをC++のコールバック関数に結びつける
-パラメータを，C++の変数ではなく，C++の関数に結びつけてノードの状態を変更したいこともあるでしょう．その場合は，[template \<class T\> DDynamicReconfigure\<NODE\>::registerVariable(const std::string& name, const T& current_value, const std::function<void(const T&)>& cb, const std::string& description, const param_range\<T\>& range)](./include/ddynamic_reconfigure2/ddynamic_reconfigure2.hpp#L255-#L270)を使います．
+パラメータを，C++の変数ではなく，C++の関数に結びつけてノードの状態を変更したいこともあるでしょう．その場合は，[次の関数](./include/ddynamic_reconfigure2/ddynamic_reconfigure2.hpp#L210-#L215)を使います．
+```c++
+template <class NODE> template <class T> void
+DDynamicReconfigure<NODE>::registerVariable(const std::string& name,
+                                            const T& current_value,
+                                            const std::function<void(const T&)>& cb,
+                                            const std::string& description="",
+                                            const param_range<T>& range={});
+```
+
 - **name**: パラメータ名．階層化する場合の区切り文字は`.`
 - **current_value**: パラメータの初期値．Tが取り得る型は[std::is_arithmetic\<T\>.value ](https://cpprefjp.github.io/reference/type_traits/is_arithmetic.html)が`true`となる型，`std::string`型もしくはそれらを要素とする`std::vector`型である．ノード起動時のパラメータconfigurationファイルでこのパラメータの値が指定されていない場合に有効
 - **cb**: パラメータ変更時に呼ばれるコールバック関数．外部から与えられたパラメータ更新値が引数として渡される．lambda関数も可
@@ -144,10 +161,18 @@ TestNode::TestNode(const rclcpp::NodeOptions& options)
 			                      [this](const double& x){ this->_param_d = x; },
 			                      "parameter of double type", {-1.0, 2.0});
 ```
-とすると，パラメータ`numeric.param_d`の値を外部から変更すると，それがここで指定したlambda関数に渡されて変数`_param_d`に代入されます．つまり`numeric.param_i64`の例と同じ動作ですが，コールバック内でもっと複雑な処理を実行することも可能です．
+とすると，パラメータ`numeric.param_d`の値を外部から変更すると，それがここで指定したlambda関数に渡されて変数`_param_d`に代入されます．つまり前項の`numeric.param_i64`の例と同じ動作ですが，もっと複雑な処理をコールバックに行わせることも可能です．
 
 ### パラメータが取り得る値を有限個の候補値に限定する
-[template <class T> void DDynamicReconfigure<NODE>::registerEnumVariable(const std::string& name, T* variable, const std::string& description, const std::map<std::string, T>& enum_dict, const std::string& enum_description)](./include/ddynamic_reconfigure2/ddynamic_reconfigure2.hpp#L278-#L288)を使うと，パラメータをあるC++変数に結びつけるとともに，その値を`enum_dict`に与えた有限個の候補値に限定することができます．
+[次の関数](./include/ddynamic_reconfigure2/ddynamic_reconfigure2.hpp#L216-#L221)を使うと，パラメータをあるC++変数に結びつけるとともに，その値を`enum_dict`に与えた有限個の候補値に限定することができます．
+```c++
+template <class NODE> template <class T> void
+DDynamicReconfigure<NODE>::registerEnumVariable(const std::string& name,
+                                                T* variable,
+                                                const std::string& description="",
+                                                const std::map<std::string, T>& enum_dict={},
+                                                const std::string& enum_description="");
+```
 - **name**: パラメータ名．階層化する場合の区切り文字は`.`
 - **variable**: パラメータの値を保持する変数へのポインタ．Tが取り得る型は[std::is_arithmetic\<T\>.value ](https://cpprefjp.github.io/reference/type_traits/is_arithmetic.html)が`true`となる型，`std::string`型もしくはそれらを要素とする`std::vector`型である．ノード起動時のパラメータconfigurationファイルでこのパラメータの値が指定されていない場合に有効
 - **description**: パラメータの説明を与える任意のテキスト
@@ -163,9 +188,17 @@ TestNode::TestNode(const rclcpp::NodeOptions& options)
 ```
 とすれば，パラメータ`string.enum_param_s`を変数`_enum_param_s`に結びつけ，その値を`One`, `Two`, `Three`のいずれかに限定できます．
 
-[template <class T> void DDynamicReconfigure<NODE>::registerEnumVariable(const std::string& name, const T& current_value, const std::function<void(const T&)>& cb, const std::string& description, const std::map<std::string, T>& enum_dict, const std::string& enum_description)](./include/ddynamic_reconfigure2/ddynamic_reconfigure2.hpp#L290-#L321)を使えば，パラメータを変数ではなくコールバック関数に結びつけた上で，その取り得る値を有限個に限定することもできます．
-
-## Python APIの使い方
+また．パラメータを変数ではなくコールバック関数に結びつけた上で，その取り得る値を有限個に限定したい場合は，[次の関数](./include/ddynamic_reconfigure2/ddynamic_reconfigure2.hpp#L222-#L229)を使います．
+```c++
+template <class NODE> template <class T> void
+DDynamicReconfigure<NODE>::registerEnumVariable(const std::string& name,
+                                                const T& current_value,
+                                                const std::function<void(const T&)>& cb,
+                                                const std::string& description="",
+                                                const std::map<std::string, T>& enum_dict={},
+                                                const std::string& enum_description="");
+```
+## Python APIの使い方（Jazzy以降）
 以下では，[テストプログラム](./scripts/pytestnode.py)を例題としてPython APIの使い方を説明します．
 
 ### パラメータ管理機能のセットアップ
