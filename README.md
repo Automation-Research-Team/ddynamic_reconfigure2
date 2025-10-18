@@ -217,7 +217,11 @@ class TestNode(Node):
         self._ddr = DDynamicReconfigure(self)
 ```
 ### パラメータをPythonのコールバック関数に結びつける
-[DDynamicReconfigure.register_variable(self, param_name, current_value, cb, description='', min_value=None, max_value=None, step=0)](./ddynamic_reconfigure2/server.py#L54-#L55)を使うと，パラメータをPythonのコールバック関数に結びつけることができます．
+`DDynamicReconfigure`の次の[メンバ関数](./ddynamic_reconfigure2/server.py#L54-#L55)を使うと，パラメータをPythonのコールバック関数に結びつけることができます．
+```python
+def register_variable(self, param_name, current_value, cb,
+                      description='', min_value=None, max_value=None, step=0)
+```
 - **name**: パラメータ名．階層化する場合の区切り文字は`.`
 - **current_value**: パラメータの初期値．取り得る型は`bool`, `int`, `float`, `str`もしくはそれらを要素とするシーケンス型である．ノード起動時のパラメータconfigurationファイルでこのパラメータの値が指定されていない場合に有効
 - **cb**: パラメータ変更時に呼ばれるコールバック関数．外部から与えられたパラメータ更新値が引数として渡される．lambda関数も可
@@ -228,16 +232,20 @@ class TestNode(Node):
 
 例えば，
 ```python
-    self._ddr.register_variable('numeric.param_i64', self._param_i64,
-                                lambda x: setattr(self, '_param_i64', x),
-                                'parameter of int64_t type', -4, 10, 2)
+self._ddr.register_variable('numeric.param_i64', self._param_i64,
+                            lambda x: setattr(self, '_param_i64', x),
+                            'parameter of int64_t type', -4, 10, 2)
 ```
 とすれば，パラメータ`numeric.param_i64`が定義され，その値を外部から変更するとそれがlambda関数に渡されてクラス`TestNode`のメンバ変数`self._param_i64`に代入されます．
 
 上記のようにlambda関数を用いれば簡単にPython変数を操作できるので，C++版のようなパラメータを直接変数に結びつけるAPIはありません．
 
 ### パラメータが取り得る値を有限個の候補値に限定する
-[DDynamicReconfigure.register_enum_variable(self, param_name, current_value, cb, description, enum_dict, enum_description='')](./ddynamic_reconfigure2/server.py#L61-#L62)を使うと，パラメータをPythonのコールバック関数に結びつけるとともに，その値を`enum_dict`に与えた有限個の候補値に限定することができます．
+`DDynamicReconfigure`の次の[メンバ関数](./ddynamic_reconfigure2/server.py#L61-#L62)を使うと，パラメータをPythonのコールバック関数に結びつけるとともに，その値を`enum_dict`に与えた有限個の候補値に限定することができます．
+```python
+def register_enum_variable(self, param_name, current_value, cb,
+                           description, enum_dict, enum_description='')
+```
 - **name**: パラメータ名．階層化する場合の区切り文字は`.`
 - **current_value**: パラメータの初期値．取り得る型は`bool`, `int`, `float`, `str`もしくはそれらを要素とするシーケンス型である．ノード起動時のパラメータconfigurationファイルでこのパラメータの値が指定されていない場合に有効
 - **cb**: パラメータ変更時に呼ばれるコールバック関数．外部から与えられたパラメータ更新値が引数として渡される．lambda関数も可
@@ -247,12 +255,11 @@ class TestNode(Node):
 
 例えば，
 ```python
-    self._ddr.register_enum_variable('numeric.enum_param_d',
-                                     self._enum_param_d,
-                                     lambda x: setattr(self, '_enum_param_d', x),
-                                     'enum parameter of double type',
-                                     {'low': 1.0, 'middle': 2.1, 'high': 3.2},
-                                     'low/middle/high')
+self._ddr.register_enum_variable('numeric.enum_param_d', self._enum_param_d,
+                                 lambda x: setattr(self, '_enum_param_d', x),
+                                 'enum parameter of double type',
+                                 {'low': 1.0, 'middle': 2.1, 'high': 3.2},
+                                 'low/middle/high')
 ```
 とすれば，パラメータ`numeric.enum_param_d`が定義され，その値を外部から変更するとそれがlambda関数に渡されてクラス`TestNode`のメンバ変数`self._enum_param_d`に代入されます．このとき，取り得る値は`1.0`, `2.1`, `3.2`のいずれかに限定されます．
 
