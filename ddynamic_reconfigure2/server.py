@@ -37,7 +37,7 @@ import rclpy, json
 from rclpy.node                    import Node
 from rclpy.parameter               import Parameter, parameter_value_to_python
 from rclpy.parameter_event_handler import ParameterEventHandler
-from rcl_interfaces.msg            import (ParameterDescriptor, ParameterType,
+from rcl_interfaces.msg            import (ParameterDescriptor,
                                            IntegerRange, FloatingPointRange)
 
 #########################################################################
@@ -79,12 +79,12 @@ class DDynamicReconfigure(object):
         desc.description    = description
         desc.read_only      = read_only
         desc.dynamic_typing = False
-        if desc.type == ParameterType.PARAMETER_INTEGER and \
+        if Parameter.Type(desc.type) == Parameter.Type.INTEGER and \
            min_value is not None and max_value is not None:
             desc.integer_range.append(IntegerRange(from_value=min_value,
                                                    to_value=max_value,
                                                    step=step))
-        elif desc.type == ParameterType.PARAMETER_DOUBLE and \
+        elif Parameter.Type(desc.type) == Parameter.Type.DOUBLE and \
              min_value is not None and max_value is not None:
             desc.floating_point_range.append(
                 FloatingPointRange(from_value=min_value, to_value=max_value,
