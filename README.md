@@ -27,14 +27,14 @@ ROS1では，ROSネットワーク内で使われる全パラメータが一箇�
 ### インストール手順
 `github`から`ddynamic_reconfigure2`を入手し，`develop`ブランチを取り出します．
 ```bash
-$ cd catkin_ws/src
+$ cd ros2_ws/src
 $ git clone git@github.com:Automation-Research-Team/ddynamic_reconfigure2.git
 $ cd ddynamic_reconfigure2
 $ git checkout develop
 ```
 そして，ワークスペース全体をコンパイルしてください．
 ```bash
-$ cd catkin_ws
+$ cd ros2_ws
 $ colcon build
 ```
 
