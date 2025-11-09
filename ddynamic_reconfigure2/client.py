@@ -55,8 +55,7 @@ class ParameterClient(AsyncParameterClient):
                 for value in future.result().values]
 
     def set_parameters_sync(self, param_tuples):
-        parameters = [Parameter(param_tuple[0],
-                                value=param_tuple[1]).to_parameter_msg()
+        parameters = [Parameter(param_tuple[0], value=param_tuple[1])
                       for param_tuple in param_tuples]
         future = self.set_parameters(parameters)
         while not future.done():
