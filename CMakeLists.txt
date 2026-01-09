@@ -20,9 +20,15 @@ ament_auto_find_build_dependencies()
 ####################################################
 #  header only library: ddynamic_reconfigure2.hpp  #
 ####################################################
-ament_auto_add_library(
-  ${PROJECT_NAME} INTERFACE
+install(
+  DIRECTORY   include/${PROJECT_NAME}
+  DESTINATION include/${PROJECT_NAME}
 )
+
+# The following is allowed only after jazzy.
+#ament_auto_add_library(
+#  ${PROJECT_NAME} INTERFACE
+#)
 
 ##############################
 #  cpp executable: testnode  #
