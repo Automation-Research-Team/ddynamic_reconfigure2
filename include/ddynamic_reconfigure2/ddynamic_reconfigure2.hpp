@@ -325,7 +325,15 @@ DDynamicReconfigure<NODE>::registerParameter(
     const param_desc_t& desc, const T& current_value,
     const std::function<void(const T&)>& cb)
 {
-    _node->declare_parameter(desc.name, current_value, desc);
+    try
+    {
+	_node->declare_parameter(desc.name, current_value, desc);
+    }
+    catch (const std::runtime_error& err)
+    {
+	RCLCPP_ERROR_STREAM(_node->get_logger(), err.what());
+	throw err;
+    }
 
     _param_cb_handles.emplace_back(
 	_param_event_handler.add_parameter_callback(
@@ -346,8 +354,18 @@ template <class NODE_PTR, class T> T
 declare_read_only_parameter(NODE_PTR&& node,
 			    const std::string& name, const T& default_value)
 {
-    return node->declare_parameter(name, default_value,
-				   param_range<T>().param_desc(name, true));
+    try
+    {
+	return node->declare_parameter(name, default_value,
+				       param_range<T>().param_desc(name,
+								   true));
+    }
+    catch (const std::runtime_error& err)
+    {
+	RCLCPP_ERROR_STREAM(node->get_logger(), err.what());
+    }
+
+    return default_value;
 }
 
 template <class NODE_PTR> std::string

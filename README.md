@@ -20,35 +20,39 @@ ROS1では，ROSネットワーク内で使われる全パラメータが一箇�
 本パッケージは，ROS1の`ddynacmic_reconfigure`に類似した簡便なインタフェースでノードパラメータとそのレンジを定義するAPIを提供します．これによって，動的に変更可能なパラメータを有するノードの開発が容易になります．
 
 ## インストール
-### 注意
+### 注意 
 本パッケージは，ROS2ノードの[ParameterEventHandler](https://docs.ros.org/en/jazzy/p/rclcpp/generated/classrclcpp_1_1ParameterEventHandler.html)を用いて実装されています．これは[Jazzy](https://docs.ros.org/en/jazzy/index.html)以降では[C++](https://docs.ros.org/en/jazzy/Tutorials/Intermediate/Monitoring-For-Parameter-Changes-CPP.html)と[Python](https://docs.ros.org/en/jazzy/Tutorials/Intermediate/Monitoring-For-Parameter-Changes-Python.html)の両方でサポートされていますが，[Humble](https://docs.ros.org/en/humble/index.html)以前では[C++](https://docs.ros.org/en/humble/Tutorials/Intermediate/Monitoring-For-Parameter-Changes-CPP.html)でしかサポートされません．したがって，本パッケージをPythonで利用するには`Jazzy`以降のdistributionが必要です．
 
 
 ### インストール手順
-`github`から`ddynamic_reconfigure2`を入手し，`develop`ブランチを取り出します．
+まず最初に，[nlohmann-json](https://github.com/nlohmann/json)をインストールします．
+```
+sudo apt install nlohmann-json3
+```
+次に，`github`から`ddynamic_reconfigure2`を入手し，`develop`ブランチを取り出します．
 ```bash
-$ cd ros2_ws/src
-$ git clone git@github.com:Automation-Research-Team/ddynamic_reconfigure2.git
-$ cd ddynamic_reconfigure2
-$ git checkout develop
+cd ros2_ws/src
+git clone git@github.com:Automation-Research-Team/ddynamic_reconfigure2.git
+cd ddynamic_reconfigure2
+git checkout develop
 ```
 そして，ワークスペース全体をコンパイルしてください．
 ```bash
-$ cd ros2_ws
-$ colcon build
+cd ros2_ws
+colcon build
 ```
 
 ### rqt_reconfigure
 本パッケージは，ノードの実行中にそのパラメータを対話的に変更するためのものですので，その操作用GUIである[rqt_reconfigure](https://index.ros.org/p/rqt_reconfigure/)をインストールしておいてください．ROS2標準リポジトリから
 ```bash
-$ sudo apt install ros-jazzy-rqt-reconfigure
+sudo apt install ros-jazzy-rqt-reconfigure
 ```
 でインストールできますが，パラメータの階層的グループ分けや有限個の候補から値を選択する列挙型のパラメータに対応していないので，それらに対応するように[修正したバージョン](https://github.com/Automation-Research-Team/rqt_reconfigure)をインストールすることをお薦めします．
 
 ## テスト
 ### C++版
 ```bash
-$ ros2 launch ddynamic_reconfigure2 test.launch.py
+ros2 launch ddynamic_reconfigure2 test.launch.py
 ```
 によって[テストプログラム](./src/testnode.cpp)と`rqt_reconfigure`が起動します．テストプログラム中では以下のパラメータが定義されており，1秒ごとにその値がコンソールに表示されます．
 - **param_b**: bool型パラメータ
@@ -67,13 +71,13 @@ $ ros2 launch ddynamic_reconfigure2 test.launch.py
 ### Python版（Jazzy以降）
 以下によってC++版と同様の[テストプログラム](./scripts/pytestnode.py)を起動できます．
 ```bash
-$ ros2 launch ddynamic_reconfigure2 pytest.launch.py
+ros2 launch ddynamic_reconfigure2 pytest.launch.py
 ```
 
-## C++ APIの使い方
+## C++ APIの使い方 
 ROS2のパラメータには，ROS1に比べて以下のような違いがあります．
 - パラメータは，必ずノード内で宣言してから使わなければならない．
-- パラメータの型は，[9種類に限定されている](https://docs.ros2.org/latest/api/rcl_interfaces/msg/ParameterType.html)．
+- パラメータの型は，[9種類に限定されている](https://docs.ros2.org/latest/api/rcl_interfaces/msg/ParameterType.html)．`ddynamic_reconfigure2`は，このうちバイト列(`PARAMETER_BYTE_ARRAY`)を除く8種類をサポートする．
 - パラメータ名を階層化する場合の区切り文字は，`/`ではなく`.`である．
 - パラメータの初期値は，宣言時に指定するか，もしくはノード起動時に与えたYAML形式のconfigurationファイルによって指定する．両方を指定すると，後者が優先される．
 - パラメータには，その型ばかりでなく，取り得る値の範囲（レンジ）や候補値（列挙型），外部からの変更の可否などの[属性](https://docs.ros2.org/latest/api/rcl_interfaces/msg/ParameterDescriptor.html)が付与され，値の変更時にその条件が満たされているかチェックされる．
