@@ -33,12 +33,12 @@
 #
 # Author: Toshio Ueshiba
 #
-import rclpy, json
-from rclpy.node                    import Node
+import json
+
+from rcl_interfaces.msg            import (FloatingPointRange, IntegerRange,
+                                           ParameterDescriptor)
 from rclpy.parameter               import Parameter, parameter_value_to_python
 from rclpy.parameter_event_handler import ParameterEventHandler
-from rcl_interfaces.msg            import (ParameterDescriptor,
-                                           IntegerRange, FloatingPointRange)
 
 #########################################################################
 #  class DDynamicReconfigure                                            #

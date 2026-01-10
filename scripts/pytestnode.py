@@ -34,7 +34,8 @@
 #
 # Author: Toshio Ueshiba
 #
-import rclpy, sys
+import sys
+import rclpy
 from rclpy.node                   import Node
 from ddynamic_reconfigure2.server import DDynamicReconfigure
 

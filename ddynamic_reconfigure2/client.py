@@ -33,7 +33,8 @@
 #
 # Author: Toshio Ueshiba
 #
-import rclpy, time
+import time
+import rclpy
 from rclpy.parameter        import Parameter, parameter_value_to_python
 from rclpy.parameter_client import AsyncParameterClient
 
