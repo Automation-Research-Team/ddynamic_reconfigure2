@@ -38,12 +38,10 @@ ROS1では，ROSネットワーク内で使われる全パラメータが一箇�
 ```
 sudo apt install nlohmann-json3-dev
 ```
-次に，`github`から`ddynamic_reconfigure2`を入手し，`develop`ブランチを取り出します．
+次に，`github`から`ddynamic_reconfigure2`を入手します．
 ```bash
 cd ros2_ws/src
 git clone git@github.com:Automation-Research-Team/ddynamic_reconfigure2.git
-cd ddynamic_reconfigure2
-git checkout develop
 ```
 そして，ワークスペース全体をコンパイルしてください．
 ```bash
