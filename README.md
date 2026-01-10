@@ -1,3 +1,6 @@
+![GitHub release (latest by date)](https://img.shields.io/github/v/release/Automation-Research-Team/ddynamic_reconfigure2)
+![GitHub](https://img.shields.io/github/license/Automation-Research-Team/ddynamic_reconfigure2)
+
 ddynamic_reconfigure2
 ==================================================
 
@@ -20,14 +23,20 @@ ROS1では，ROSネットワーク内で使われる全パラメータが一箇�
 本パッケージは，ROS1の`ddynacmic_reconfigure`に類似した簡便なインタフェースでノードパラメータとそのレンジを定義するAPIを提供します．これによって，動的に変更可能なパラメータを有するノードの開発が容易になります．
 
 ## インストール
-### 注意 
+### 動作環境
+本パッケージは，`Ubuntu-24.04` + [ROS2 Jazzy](https://docs.ros.org/en/jazzy/index.html)の下で動作確認しています．
+| ROS 2 Distribution | Humble                                                                                                                                                                      | Jazzy                                                                                                                                                                    |
+| ------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| Build Status       | [![humble-build](https://github.com/OpenHRC/OpenHRC/actions/workflows/humble-build.yaml/badge.svg)](https://github.com/OpenHRC/OpenHRC/actions/workflows/humble-build.yaml) | [![jazzy-build](https://github.com/Automation-Research-Team/ddynamic_reconfigure2/actions/workflows/jazzy-build.yaml/badge.svg)](https://github.com/Automation-Research-Team/ddynamic_reconfigure2actions/workflows/jazzy-build.yaml) |
+
+#### 注意
 本パッケージは，ROS2ノードの[ParameterEventHandler](https://docs.ros.org/en/jazzy/p/rclcpp/generated/classrclcpp_1_1ParameterEventHandler.html)を用いて実装されています．これは[Jazzy](https://docs.ros.org/en/jazzy/index.html)以降では[C++](https://docs.ros.org/en/jazzy/Tutorials/Intermediate/Monitoring-For-Parameter-Changes-CPP.html)と[Python](https://docs.ros.org/en/jazzy/Tutorials/Intermediate/Monitoring-For-Parameter-Changes-Python.html)の両方でサポートされていますが，[Humble](https://docs.ros.org/en/humble/index.html)以前では[C++](https://docs.ros.org/en/humble/Tutorials/Intermediate/Monitoring-For-Parameter-Changes-CPP.html)でしかサポートされません．したがって，本パッケージをPythonで利用するには`Jazzy`以降のdistributionが必要です．
 
 
 ### インストール手順
 まず最初に，[nlohmann-json](https://github.com/nlohmann/json)をインストールします．
 ```
-sudo apt install nlohmann-json3
+sudo apt install nlohmann-json3-dev
 ```
 次に，`github`から`ddynamic_reconfigure2`を入手し，`develop`ブランチを取り出します．
 ```bash
