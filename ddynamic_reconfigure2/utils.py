@@ -39,9 +39,11 @@ from ddynamic_reconfigure2.server import DDynamicReconfigure
 #########################################################################
 #  utility functions                                                    #
 #########################################################################
-def declare_read_only_parameter(node, param_name, default_value):
+def declare_read_only_parameter(node, param_name, default_value,
+                                type_hint=None):
     return parameter_value_to_python(
                node.declare_parameter(
                    param_name, default_value,
                    DDynamicReconfigure.create_desc(
-                       param_name, default_value, True)).get_parameter_value())
+                       param_name, default_value, True,
+                       type_hint=type_hint)).get_parameter_value())

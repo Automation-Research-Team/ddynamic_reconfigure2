@@ -71,10 +71,12 @@ class DDynamicReconfigure(object):
 
     @staticmethod
     def create_desc(param_name, current_value, read_only=False,
-                    description='', min_value=None, max_value=None, step=0):
+                    description='', min_value=None, max_value=None, step=0,
+                    type_hint=None):
         desc = ParameterDescriptor()
         desc.name           = param_name
-        desc.type           = Parameter.Type.from_parameter_value(
+        desc.type           = type_hint if type_hint else \
+                              Parameter.Type.from_parameter_value(
                                   current_value)
         desc.description    = description
         desc.read_only      = read_only
