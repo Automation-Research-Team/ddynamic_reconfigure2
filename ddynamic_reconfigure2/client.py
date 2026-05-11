@@ -96,9 +96,7 @@ class ParameterClient(AsyncParameterClient):
                 raise TimeoutError()
         return [parameter_value_to_python(value) for value in values]
 
-    def set_parameters_sync(self,
-                            param_tuples: Sequence[Union[Parameter[Any],
-                                                         ParameterMsg]],
+    def set_parameters_sync(self, param_tuples,
                             *, timeout_sec: Optional[float]=None):
         """ Set parameters given a list of parameters.
 
