@@ -62,7 +62,7 @@ jobs:
 
     - name: Build documents of ddynamic_reconfigure2
       run: |
-        cd ${WS}/src/ddynamic_reconfigure2
+        cd ./ddynamic_reconfigure2
         doxygen
 
     - name: Upload artifact of ddynamic_reconfigure2
