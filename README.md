@@ -1,5 +1,9 @@
-![GitHub release (latest by date)](https://img.shields.io/github/v/release/Automation-Research-Team/ddynamic_reconfigure2)
-![GitHub](https://img.shields.io/github/license/Automation-Research-Team/ddynamic_reconfigure2)
+![GitHub release (latest by date)](https://img.shields.io/github/v/release/Task-Intellignet-Robotics-Research-Grp/ddynamic_reconfigure2)
+![GitHub](https://img.shields.io/github/license/Task-Intellignet-Robotics-Research-Grp/ddynamic_reconfigure2)
+
+| ROS 2 Distribution | Jazzy                                                                                                                                                                    |
+| ------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| Build Status       | [![jazzy-build](https://github.com/Task-Intelligent-Robotics-Research-Grp/ddynamic_reconfigure2/actions/workflows/jazzy-build.yaml/badge.svg)](https://github.com/Task-Intelligent-Robotics-Research-Grp/ddynamic_reconfigure2/actions/workflows/jazzy-build.yaml) |
 
 ddynamic_reconfigure2
 ==================================================
@@ -25,9 +29,6 @@ ROS1では，ROSネットワーク内で使われる全パラメータが一箇�
 ## インストール
 ### 動作環境
 本パッケージは，`Ubuntu-24.04` + [ROS2 Jazzy](https://docs.ros.org/en/jazzy/index.html)の下で動作確認しています．
-| ROS 2 Distribution | Humble                                                                                                                                                                      | Jazzy                                                                                                                                                                    |
-| ------------------ | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| Build Status       | [![humble-build](https://github.com/OpenHRC/OpenHRC/actions/workflows/humble-build.yaml/badge.svg)](https://github.com/OpenHRC/OpenHRC/actions/workflows/humble-build.yaml) | [![jazzy-build](https://github.com/Automation-Research-Team/ddynamic_reconfigure2/actions/workflows/jazzy-build.yaml/badge.svg)](https://github.com/Automation-Research-Team/ddynamic_reconfigure2actions/workflows/jazzy-build.yaml) |
 
 #### 注意
 本パッケージは，ROS2ノードの[ParameterEventHandler](https://docs.ros.org/en/jazzy/p/rclcpp/generated/classrclcpp_1_1ParameterEventHandler.html)を用いて実装されています．これは[Jazzy](https://docs.ros.org/en/jazzy/index.html)以降では[C++](https://docs.ros.org/en/jazzy/Tutorials/Intermediate/Monitoring-For-Parameter-Changes-CPP.html)と[Python](https://docs.ros.org/en/jazzy/Tutorials/Intermediate/Monitoring-For-Parameter-Changes-Python.html)の両方でサポートされていますが，[Humble](https://docs.ros.org/en/humble/index.html)以前では[C++](https://docs.ros.org/en/humble/Tutorials/Intermediate/Monitoring-For-Parameter-Changes-CPP.html)でしかサポートされません．したがって，本パッケージをPythonで利用するには`Jazzy`以降のdistributionが必要です．
@@ -81,7 +82,7 @@ ros2 launch ddynamic_reconfigure2 test.launch.py
 ros2 launch ddynamic_reconfigure2 pytest.launch.py
 ```
 
-## C++ APIの使い方 
+## C++ APIの使い方
 ROS2のパラメータには，ROS1に比べて以下のような違いがあります．
 - パラメータは，必ずノード内で宣言してから使わなければならない．
 - パラメータの型は，[9種類に限定されている](https://docs.ros2.org/latest/api/rcl_interfaces/msg/ParameterType.html)．`ddynamic_reconfigure2`は，このうちバイト列(`PARAMETER_BYTE_ARRAY`)を除く8種類をサポートする．
