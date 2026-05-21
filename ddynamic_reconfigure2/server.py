@@ -38,9 +38,9 @@ from rcl_interfaces.msg            import (FloatingPointRange, IntegerRange,
 from rclpy.parameter               import Parameter, parameter_value_to_python
 from rclpy.parameter_event_handler import ParameterEventHandler
 
-#########################################################################
-#  class DDynamicReconfigure                                            #
-#########################################################################
+#************************************************************************
+#  class DDynamicReconfigure                                            *
+#************************************************************************
 class DDynamicReconfigure(object):
     def __init__(self, node):
         super().__init__()

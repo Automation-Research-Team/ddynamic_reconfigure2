@@ -42,9 +42,9 @@ from rclpy.callback_groups  import CallbackGroup
 from rcl_interfaces.msg     import Parameter as ParameterMsg
 from typing                 import Any, List, Optional, Sequence, Union
 
-#########################################################################
-#  class ParametrerClient                                               #
-#########################################################################
+#************************************************************************
+#  class ParametrerClient                                               *
+#************************************************************************
 class ParameterClient(AsyncParameterClient):
     """ Extention of AsyncParameterClient with synchronus get/set methods.
     """
@@ -103,7 +103,7 @@ class ParameterClient(AsyncParameterClient):
         The result after the returned future is complete
         will be of type ``rcl_interfaces.srv.SetParameters.Response``.
 
-        :param parameters: Sequence of parameters to set.
+        :param param_tuples: Sequence of parameters to set.
         :param timeout_sec: Timeout time waiting for setting remote parameters
             being completed.
           - Seconds to wait for completion.

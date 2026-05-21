@@ -34,9 +34,9 @@
 from rclpy.parameter              import parameter_value_to_python
 from ddynamic_reconfigure2.server import DDynamicReconfigure
 
-#########################################################################
-#  utility functions                                                    #
-#########################################################################
+#************************************************************************
+#  utility functions                                                    *
+#************************************************************************
 def declare_read_only_parameter(node, param_name, default_value,
                                 type_hint=None):
     return parameter_value_to_python(

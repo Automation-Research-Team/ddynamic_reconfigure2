@@ -65,12 +65,6 @@ jobs:
         cd ${WS}/src/ddynamic_reconfigure2
         doxygen
 
-    - name: Build documents of ddynamic_reconfigure2_msgs
-      run: |
-        cd ${WS}/src/ddynamic_reconfigure2/docs
-        rosdoc2 build --package-path ../ddynamic_reconfigure2_msgs
-        mv ./docs_output/ddynamic_reconfigure2_msgs ./html
-
     - name: Upload artifact of ddynamic_reconfigure2
       uses: actions/upload-pages-artifact@v4
       with:
