@@ -11,7 +11,7 @@ jobs:
 
     - name: Install dependencies
       run: |
-        sudo apt install vcstool doxygen
+        sudo apt install vcstool graphviz doxygen
 
     - name: Checkout dependencies
       run: |
