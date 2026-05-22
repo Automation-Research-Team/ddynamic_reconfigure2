@@ -11,7 +11,7 @@ jobs:
 
     - name: Install dependencies
       run: |
-        sudo apt install doxygen
+        sudo apt install vcstool doxygen
 
     - name: Checkout dependencies
       run: |
