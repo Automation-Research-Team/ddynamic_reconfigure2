@@ -42,7 +42,7 @@ sudo apt install nlohmann-json3-dev
 次に，`github`から`ddynamic_reconfigure2`を入手します．
 ```bash
 cd ros2_ws/src
-git clone git@github.com:Automation-Research-Team/ddynamic_reconfigure2.git
+git clone git@github.com:Task-Intelligent-Robotics-Research-Grp/ddynamic_reconfigure2.git
 ```
 そして，ワークスペース全体をコンパイルしてください．
 ```bash
@@ -55,7 +55,7 @@ colcon build
 ```bash
 sudo apt install ros-jazzy-rqt-reconfigure
 ```
-でインストールできますが，パラメータの階層的グループ分けや有限個の候補から値を選択する列挙型のパラメータに対応していないので，それらに対応するように[修正したバージョン](https://github.com/Automation-Research-Team/rqt_reconfigure)をインストールすることをお薦めします．
+でインストールできますが，パラメータの階層的グループ分けや有限個の候補から値を選択する列挙型のパラメータに対応していないので，それらに対応するように[修正したバージョン](https://github.com/Task-Intelligent-Robotics-Research-Grp/rqt_reconfigure)をインストールすることをお薦めします．
 
 ## テスト
 ### C++版
@@ -276,3 +276,6 @@ self._ddr.register_enum_variable('numeric.enum_param_d', self._enum_param_d,
 とすれば，パラメータ`numeric.enum_param_d`が定義され，その値を外部から変更するとそれがlambda関数に渡されてクラス`TestNode`のメンバ変数`self._enum_param_d`に代入されます．このとき，取り得る値は`1.0`, `2.1`, `3.2`のいずれかに限定されます．
 
 上記のようにlambda関数を用いれば簡単にPython変数を操作できるので，C++版のようなパラメータを直接変数に結びつけるAPIはありません．
+
+## APIドキュメント
+ライブラリのAPIドキュメントは[こちら](https://task-intelligent-robotics-research-grp.github.io/ddynamic_reconfigure2/)にあります．
