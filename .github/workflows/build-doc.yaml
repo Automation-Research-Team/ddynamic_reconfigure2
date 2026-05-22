@@ -1,0 +1,41 @@
+name: build-doc
+on: push
+
+jobs:
+  build-doc:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+      with:
+        path: ddynamic_reconfigure2
+
+    - name: Install dependencies
+      run: |
+        sudo apt install doxygen
+
+    - name: Checkout dependencies
+      run: |
+        vcs import . --input=ddynamic_reconfigure2/dependencies.repos
+
+    - name: Install doxyfilter_python
+      run: |
+        sudo install ./doxyfilter_python/doxyfilter_python.py /usr/local/bin
+
+    - name: Build documents of ddynamic_reconfigure2
+      run: |
+        cd ./ddynamic_reconfigure2
+        doxygen
+
+    - name: Upload artifact of ddynamic_reconfigure2
+      uses: actions/upload-pages-artifact@v4
+      with:
+        path: ./ddynamic_reconfigure2/docs/html
+
+    - name: Deploy to GitHub Pages
+      id: deployment
+      uses: actions/deploy-pages@v5
+
+permissions:
+  contents: write
+  pages: write
+  id-token: write
