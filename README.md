@@ -1,5 +1,5 @@
-![GitHub release (latest by date)](https://img.shields.io/github/v/release/Task-Intellignet-Robotics-Research-Grp/ddynamic_reconfigure2)
-![GitHub](https://img.shields.io/github/license/Task-Intellignet-Robotics-Research-Grp/ddynamic_reconfigure2)
+![GitHub Release](https://img.shields.io/github/v/release/Task-Intelligent-Robotics-Research-Grp/ddynamic_reconfigure2)
+![GitHub License](https://img.shields.io/github/license/Task-Intelligent-Robotics-Research-Grp/ddynamic_reconfigure2)
 
 | ROS 2 Distribution | Jazzy                                                                                                                                                                    |
 | ------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
