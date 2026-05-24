@@ -5,11 +5,14 @@
 | ------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
 | Build Status       | [![jazzy-build](https://github.com/Task-Intelligent-Robotics-Research-Grp/ddynamic_reconfigure2/actions/workflows/jazzy-build.yaml/badge.svg)](https://github.com/Task-Intelligent-Robotics-Research-Grp/ddynamic_reconfigure2/actions/workflows/jazzy-build.yaml) |
 
-[ddynamic_reconfigure2](https://github.com/Task-Intelligent-Robotics-Research-Grp/ddynamic_reconfigure2)
+ddynamic_reconfigure2
 ==================================================
 
 ## 概要
 本パッケージは，ROS2ノードに対して動的に変更可能なノードパラメータを簡便に設定するためのインタフェースを提供します．これは，ROS1における[ddynamic_reconfigure](https://github.com/pal-robotics/ddynamic_reconfigure)に相当するものですが，C++（ノードを[rclcpp](https://github.com/ros2/rclcpp)で記述）とPython（ノードを[rclpy](https://github.com/ros2/rclpy)で記述）の両方に対応しています．
+
+- [GitHub repository](https://github.com/Task-Intelligent-Robotics-Research-Grp/ddynamic_reconfigure2)
+- [API document](https://task-intelligent-robotics-research-grp.github.io/ddynamic_reconfigure2/)
 
 ## 背景
 ROS1では，ROSネットワーク内で使われる全パラメータが一箇所(roscoreのパラメータサーバ)で管理されており，その値をノードの実行中に対話的に変更するために[dynamic_reconfigure](https://wiki.ros.org/dynamic_reconfigure)という特殊な仕組みが使われてきました．`dynamic_reconfigure`を使ってノードを開発すれば，動的に変更したいパラメータを定義し，その値が取り得るレンジを指定できます．しかし，それはノードのビルド時に行われる必要があり，ノードの起動後にパラメータの定義やレンジの設定をすることはできませんでした．
