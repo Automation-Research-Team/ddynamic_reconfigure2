@@ -31,6 +31,8 @@
 #
 #  Author: Toshio Ueshiba (t.ueshiba@aist.go.jp)
 #
+""" Defines python implementation of ParameterClient.
+"""
 import threading
 import rclpy
 from rclpy.parameter        import Parameter, parameter_value_to_python
@@ -103,14 +105,13 @@ class ParameterClient(AsyncParameterClient):
     def set_parameters_sync(self, param_tuples,
                             *, timeout_sec: Optional[float]=None):
         """ Set parameters given a list of parameters.
-
         The result after the returned future is complete
         will be of type ``rcl_interfaces.srv.SetParameters.Response``.
 
         Args:
           param_tuples: Sequence of parameters to set.
           timeout_sec: Timeout time in seconds waiting for setting remote
-            parameters being completed. Wait forever, if ``None``.
+            parameters being completed. Wait forever, if `None`.
 
         Returns:
           Result of the request.

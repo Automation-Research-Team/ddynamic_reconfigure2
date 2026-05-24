@@ -31,6 +31,8 @@
 #
 #  Author: Toshio Ueshiba (t.ueshiba@aist.go.jp)
 #
+""" Defines python implementation of DDynamicReconfigure server.
+"""
 import json
 
 from rcl_interfaces.msg            import (FloatingPointRange, IntegerRange,
@@ -43,6 +45,8 @@ from rclpy.parameter_event_handler import ParameterEventHandler
 #  class DDynamicReconfigure                                            *
 #************************************************************************
 class DDynamicReconfigure(object):
+    """ Python implementation of DDynamicReconfigure server.
+    """
     def __init__(self, node: Node):
         """
         Args:
@@ -113,7 +117,7 @@ class DDynamicReconfigure(object):
           type_hint: Hint on type of the parameter.
 
         Returns:
-          ParameterDescriptor: Descriptor of the parameter.
+          Descriptor of the parameter.
         """
         desc = ParameterDescriptor()
         desc.name           = param_name
