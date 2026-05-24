@@ -31,6 +31,8 @@
 #
 #  Author: Toshio Ueshiba (t.ueshiba@aist.go.jp)
 #
+""" Defines python utility functions.
+"""
 from rclpy.node                   import Node
 from rclpy.parameter              import parameter_value_to_python
 from ddynamic_reconfigure2.server import DDynamicReconfigure
