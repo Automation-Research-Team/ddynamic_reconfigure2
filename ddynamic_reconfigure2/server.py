@@ -35,6 +35,7 @@ import json
 
 from rcl_interfaces.msg            import (FloatingPointRange, IntegerRange,
                                            ParameterDescriptor)
+from rclpy.node                    import Node
 from rclpy.parameter               import Parameter, parameter_value_to_python
 from rclpy.parameter_event_handler import ParameterEventHandler
 
@@ -42,22 +43,49 @@ from rclpy.parameter_event_handler import ParameterEventHandler
 #  class DDynamicReconfigure                                            *
 #************************************************************************
 class DDynamicReconfigure(object):
-    def __init__(self, node):
+    def __init__(self, node: Node):
+        """
+        Args:
+          node: ROS node.
+        """
         super().__init__()
 
         self._node = node
         self._param_event_handler = ParameterEventHandler(self._node)
         self._param_cb_handles = []
 
-    def register_variable(self, param_name, current_value, cb, description='',
-                          min_value=None, max_value=None, step=0):
+    def register_variable(self, param_name: str, current_value, cb,
+                          description: str='',
+                          min_value=None, max_value=None, step=0) -> None:
+        """ Register parameter variable.
+
+        Args:
+          param_name: Name of the parameter.
+          current_value: Initial value of the parameter.
+          cb: Callback function invoked when the parameter value is changed.
+          description: Description on the parameter.
+          min_value: Minimum value of the parameter.
+          max_value: Maximum value of the parameter.
+          step: Increment step of the parameter value.
+        """
         self._register_parameter(DDynamicReconfigure.create_desc(
                                      param_name, current_value, False,
                                      description, min_value, max_value, step),
                                  current_value, cb)
 
-    def register_enum_variable(self, param_name, current_value, cb,
-                               description, enum_dict, enum_description=''):
+    def register_enum_variable(self, param_name: str, current_value, cb,
+                               description: str,
+                               enum_dict, enum_description:str='') -> None:
+        """ Register parameter variable which can take a finite set of values.
+
+        Args:
+          param_name: Name of the parameter.
+          current_value: Initial value of the parameter.
+          cb: Callback function invoked when the parameter value is changed.
+          description: Description on the parameter.
+          enum_dict: Dictionary of possible parameter values with string keys.
+          enum_description: Description on the enumaration dictionary.
+        """
         desc = DDynamicReconfigure.create_desc(param_name, current_value,
                                                False, description,
                                                min(enum_dict.values()),
@@ -68,9 +96,25 @@ class DDynamicReconfigure(object):
         self._register_parameter(desc, current_value, cb)
 
     @staticmethod
-    def create_desc(param_name, current_value, read_only=False,
-                    description='', min_value=None, max_value=None, step=0,
-                    type_hint=None):
+    def create_desc(param_name: str, current_value, read_only: bool=False,
+                    description: str='',
+                    min_value=None, max_value=None, step=0,
+                    type_hint=None) -> ParameterDescriptor:
+        """ Create a parameter descriptor.
+
+        Args:
+          param_name: Name of the parameter.
+          current_value: Initial value of the parameter.
+          read_only: True iff the parameter is read-only.
+          description: Description on the parameter.
+          min_value: Minimum value of the parameter.
+          max_value: Maximum value of the parameter.
+          step: Increment step of the parameter value.
+          type_hint: Hint on type of the parameter.
+
+        Returns:
+          ParameterDescriptor: Descriptor of the parameter.
+        """
         desc = ParameterDescriptor()
         desc.name           = param_name
         desc.type           = type_hint if type_hint else \

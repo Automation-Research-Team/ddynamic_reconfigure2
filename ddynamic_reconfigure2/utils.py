@@ -31,14 +31,26 @@
 #
 #  Author: Toshio Ueshiba (t.ueshiba@aist.go.jp)
 #
+from rclpy.node                   import Node
 from rclpy.parameter              import parameter_value_to_python
 from ddynamic_reconfigure2.server import DDynamicReconfigure
 
 #************************************************************************
 #  utility functions                                                    *
 #************************************************************************
-def declare_read_only_parameter(node, param_name, default_value,
+def declare_read_only_parameter(node: Node, param_name: str, default_value,
                                 type_hint=None):
+    """ Declare read-only parameter.
+
+    Args:
+      node: Node on which the parameter declared.
+      param_name: Name of the parameter.
+      default_value: Default value of the parameter.
+      type_hint: Hint on type of the parameter.
+
+    Returns:
+      Parameter value represented in python format.
+    """
     return parameter_value_to_python(
                node.declare_parameter(
                    param_name, default_value,

@@ -1,5 +1,0 @@
-repositories:
-  doxyfilter_python:
-    type: git
-    url: https://github.com/Task-Intelligent-Robotics-Research-Grp/doxyfilter_python
-    version: devel-aist

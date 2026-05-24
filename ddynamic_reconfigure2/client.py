@@ -51,34 +51,38 @@ class ParameterClient(AsyncParameterClient):
     def __init__(self, node: Node, remote_node_name: str,
                  qos_profile: QoSProfile=qos_profile_services_default,
                  callback_group: Optional[CallbackGroup]=None):
-        """ Create an ParameterClient.
-
+        """
         An ParameterClient is a subclass
         of rclpy.parameter_client.AsyncParameterClinet which adds two
         methods for getting/setting parameters of remote node
         in a synchronous manner.
 
-        :param node: Node used to create clients that will interact
+        Args:
+          node: Node used to create clients that will interact
             with the remote node.
-        :param remote_node_name: Name of remote node for which the parameters
+          remote_node_name: Name of remote node for which the parameters
             will be managed.
-        :param qos_profile:
-        :param callback_group: Callback group to add the parameter client to.
-            If None, then the node's default callback group is used.
+          qos_profile: Profile of QoS.
+          callback_group: Callback group to add the parameter client to.
+            If `None`, then the node's default callback group is used.
         """
         super().__init__(node, remote_node_name, qos_profile=qos_profile,
                          callback_group=callback_group)
 
     def get_parameters_sync(self, names: List[str], *,
                             timeout_sec: Optional[float]=None):
-        """ Get parameters given names.
+        """ Get parameters with given names.
 
-        :param names: List of parameter names to get.
-        :param timeout_sec: Timeout time waiting for remote parameters
-            being obtained.
-          - Seconds to wait for parameters.
-          - Wait forever, if ``None``.
-        :return: List of parameter values.
+        Args:
+          names: List of parameter names to get.
+          timeout_sec: Timeout time waiting for remote parameters
+            being obtained. Seconds to wait. Wait forever, if `None`.
+
+        Returns:
+          list[str]: List of parameter values.
+
+        Raises:
+          TimeoutError: on a timeout.
         """
         values      = None
         values_cond = threading.Condition()
@@ -103,12 +107,16 @@ class ParameterClient(AsyncParameterClient):
         The result after the returned future is complete
         will be of type ``rcl_interfaces.srv.SetParameters.Response``.
 
-        :param param_tuples: Sequence of parameters to set.
-        :param timeout_sec: Timeout time waiting for setting remote parameters
-            being completed.
-          - Seconds to wait for completion.
-          - Wait forever, if ``None``.
-        :return: Result of the request.
+        Args:
+          param_tuples: Sequence of parameters to set.
+          timeout_sec: Timeout time in seconds waiting for setting remote
+            parameters being completed. Wait forever, if ``None``.
+
+        Returns:
+          Result of the request.
+
+        Raises:
+          TimeoutError: on a timeout.
         """
         results      = None
         results_cond = threading.Condition()
