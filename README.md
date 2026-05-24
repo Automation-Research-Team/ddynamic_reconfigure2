@@ -11,7 +11,7 @@ ddynamic_reconfigure2
 ## 概要
 本パッケージは，ROS2ノードに対して動的に変更可能なノードパラメータを簡便に設定するためのインタフェースを提供します．これは，ROS1における[ddynamic_reconfigure](https://github.com/pal-robotics/ddynamic_reconfigure)に相当するものですが，C++（ノードを[rclcpp](https://github.com/ros2/rclcpp)で記述）とPython（ノードを[rclpy](https://github.com/ros2/rclpy)で記述）の両方に対応しています．
 
-- [GitHub repository]((https://github.com/Task-Intelligent-Robotics-Research-Grp/ddynamic_reconfigure2)
+- [GitHub repository](https://github.com/Task-Intelligent-Robotics-Research-Grp/ddynamic_reconfigure2)
 - [API document](https://task-intelligent-robotics-research-grp.github.io/ddynamic_reconfigure2/)
 
 ## 背景
