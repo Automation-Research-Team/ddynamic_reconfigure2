@@ -102,14 +102,14 @@ class ParameterClient(AsyncParameterClient):
                 raise TimeoutError()
         return [parameter_value_to_python(value) for value in values]
 
-    def set_parameters_sync(self, param_tuples,
+    def set_parameters_sync(self, param_dict: dict,
                             *, timeout_sec: Optional[float]=None):
         """ Set parameters given a list of parameters.
         The result after the returned future is complete
         will be of type ``rcl_interfaces.srv.SetParameters.Response``.
 
         Args:
-          param_tuples: Sequence of parameters to set.
+          param_dict: Dictionary of parameters to set with string keys.
           timeout_sec: Timeout time in seconds waiting for setting remote
             parameters being completed. Wait forever, if `None`.
 
@@ -128,8 +128,8 @@ class ParameterClient(AsyncParameterClient):
             with results_cond:
                 results_cond.notify_all()
 
-        parameters = [Parameter(param_tuple[0], value=param_tuple[1])
-                      for param_tuple in param_tuples]
+        parameters = [Parameter(name=name, value=value)
+                      for name, value in param_dict.items()]
         self.set_parameters(parameters, _set_parameters_cb)
         with results_cond:
             if not results_cond.wait_for(lambda: results is not None,
