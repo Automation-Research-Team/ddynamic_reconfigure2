@@ -26,9 +26,9 @@ install(
 )
 
 # The following is allowed only after jazzy.
-#ament_auto_add_library(
-#  ${PROJECT_NAME} INTERFACE
-#)
+ament_auto_add_library(
+ ${PROJECT_NAME} INTERFACE
+)
 
 ##############################
 #  cpp executable: testnode  #
