@@ -1,9 +1,9 @@
 ![GitHub Release](https://img.shields.io/github/v/release/Task-Intelligent-Robotics-Research-Grp/ddynamic_reconfigure2)
 ![GitHub License](https://img.shields.io/github/license/Task-Intelligent-Robotics-Research-Grp/ddynamic_reconfigure2)
 
-| ROS 2 Distribution | Jazzy                                                                                                                                                                    |
-| ------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
-| Build Status       | [![jazzy-build](https://github.com/Task-Intelligent-Robotics-Research-Grp/ddynamic_reconfigure2/actions/workflows/jazzy-build.yaml/badge.svg)](https://github.com/Task-Intelligent-Robotics-Research-Grp/ddynamic_reconfigure2/actions/workflows/jazzy-build.yaml) |
+| ROS 2 Distribution | Jazzy                                                                                                                                                                    | Lyrical                                                                                                                                                                  |
+| ------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------ |
+| Build Status       | [![jazzy-build](https://github.com/Task-Intelligent-Robotics-Research-Grp/ddynamic_reconfigure2/actions/workflows/jazzy-build.yaml/badge.svg)](https://github.com/Task-Intelligent-Robotics-Research-Grp/ddynamic_reconfigure2/actions/workflows/jazzy-build.yaml) | [![lyrical-build](https://github.com/Task-Intelligent-Robotics-Research-Grp/ddynamic_reconfigure2/actions/workflows/lyrical-build.yaml/badge.svg)](https://github.com/Task-Intelligent-Robotics-Research-Grp/ddynamic_reconfigure2/actions/workflows/lyrical-build.yaml) |
 
 ddynamic_reconfigure2
 ==================================================
