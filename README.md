@@ -219,8 +219,8 @@ DDynamicReconfigure<NODE>::registerEnumVariable(const std::string& name,
 ### パラメータ管理機能のセットアップ
 開発するノードに[class DDynamicReconfigure](./ddynamic_reconfigure2/server.py#L46)型のメンバ変数を持たせることにより，パラメータやそのレンジを設定する準備が整います．
 ```python
-from rclpy.node                   import Node
-from ddynamic_reconfigure2.server import DDynamicReconfigure
+from rclpy.node            import Node
+from ddynamic_reconfigure2 import DDynamicReconfigure
 
 class TestNode(Node):
     def __init__(self, node_name):

@@ -33,9 +33,9 @@
 #
 """ Defines python utility functions.
 """
-from rclpy.node                   import Node
-from rclpy.parameter              import parameter_value_to_python
-from ddynamic_reconfigure2.server import DDynamicReconfigure
+from rclpy.node            import Node
+from rclpy.parameter       import parameter_value_to_python
+from ddynamic_reconfigure2 import DDynamicReconfigure
 
 #************************************************************************
 #  utility functions                                                    *

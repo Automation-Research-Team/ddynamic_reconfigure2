@@ -35,8 +35,8 @@
 #
 import sys
 import rclpy
-from rclpy.node                   import Node
-from ddynamic_reconfigure2.server import DDynamicReconfigure
+from rclpy.node            import Node
+from ddynamic_reconfigure2 import DDynamicReconfigure
 
 #########################################################################
 #  class TestNode                                                       #
